@@ -1035,8 +1035,7 @@
         2576
       ],
       "id": "b0197920-c83d-463c-bd6a-60aa4cb1dc8a",
-      "name": "Extract from CSV",
-      "disabled": true
+      "name": "Extract from CSV"
     },
     {
       "parameters": {
@@ -1082,7 +1081,12 @@
       "id": "87b688fa-9901-41bb-9d34-bb031749022a",
       "name": "Get row(s) in sheet",
       "retryOnFail": true,
-      "disabled": true
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6aoICKKcHuKqap7X",
+          "name": "Google Sheets purviewworkshop"
+        }
+      }
     },
     {
       "parameters": {
@@ -1179,7 +1183,12 @@
       "id": "2b524a4d-ad42-421c-86d1-12e411958dcd",
       "name": "Get google sheet info",
       "retryOnFail": true,
-      "disabled": true
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "6aoICKKcHuKqap7X",
+          "name": "Google Sheets purviewworkshop"
+        }
+      }
     },
     {
       "parameters": {
@@ -2788,8 +2797,7 @@
         592
       ],
       "id": "88321342-212c-4673-ad01-afce27baca12",
-      "name": "Webpage Markdown",
-      "disabled": true
+      "name": "Webpage Markdown"
     },
     {
       "parameters": {

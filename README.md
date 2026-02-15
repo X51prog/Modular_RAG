@@ -140,6 +140,11 @@ Called by the retrieval workflow to persist conversation context:
 
 ## Changelog
 
+### v1.4 - 2025-02-15
+- Enabled **CSV** file support (Extract from CSV node)
+- Enabled **Google Sheets** support (Get google sheet info + Get row(s) in sheet) with OAuth2 credentials
+- Enabled **Webpage Markdown** processing node
+
 ### v1.3 - 2025-02-15
 - Added **RAG Retrieval Sub-Workflow** (v2.3.3) — agentic retrieval with dynamic hybrid search
 - Added **Knowledge Graph Workflow** (LightRAG v1.1) — knowledge graph sub-workflow
