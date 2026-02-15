@@ -140,9 +140,12 @@ Called by the retrieval workflow to persist conversation context:
 
 ## Changelog
 
+### v1.5.1 - 2025-02-15
+- Reverted **Cohere reranking** pipeline back to disabled (caused infinite hang — needs Cohere API key setup)
+
 ### v1.5 - 2025-02-15
 - **Anti-hallucination improvements** to RAG Retrieval Sub-Workflow:
-  - Enabled **Cohere rerank-v3.5** pipeline (If3 → Create Array → Rerank → Return Reordered Items)
+  - ~~Enabled Cohere rerank-v3.5 pipeline~~ (reverted in v1.5.1)
   - Set agent model (GPT-5.2) **temperature to 0.1** for more factual responses
   - Strengthened **system prompt** with inline citation rules, grounding requirements, and partial-answer handling
 
