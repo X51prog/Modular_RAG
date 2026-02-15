@@ -1,5 +1,8 @@
 # Claude Code local settings
 .claude/
 
+# Dev folder — live n8n exports for diffing, not published
+N8N/
+
 # Accidental Windows artifacts
 nul

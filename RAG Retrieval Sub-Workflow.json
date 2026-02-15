@@ -1,5 +1,5 @@
 {
-  "name": "SOTA RAG Retrieval Sub-Workflow",
+  "name": "Retrieval Sub-Workflow",
   "nodes": [
     {
       "parameters": {
@@ -11,10 +11,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -4000,
-        416
+        14560,
+        7504
       ],
-      "id": "a0e914bd-911d-49c5-a40d-b0be3eff497c",
+      "id": "58048e90-ec46-47b1-86ef-c4e6096653c0",
       "name": "Sticky Note6"
     },
     {
@@ -27,10 +27,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -4864,
-        416
+        13696,
+        7504
       ],
-      "id": "cc0b3ab3-2ada-4fcd-8932-f69de41f56f2",
+      "id": "8cbb3fa7-84ed-4f19-a01c-a21293cf4d2d",
       "name": "Sticky Note18"
     },
     {
@@ -40,10 +40,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        -3600,
-        864
+        14960,
+        7952
       ],
-      "id": "8520ee24-ebae-4d9f-81fa-e72a1ff471dd",
+      "id": "e3ccf5cd-a982-4e6c-935a-da851d3e43d9",
       "name": "Supabase Short-Term Memory",
       "credentials": {
         "postgres": {
@@ -62,10 +62,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -4704,
-        784
+        13856,
+        7872
       ],
-      "id": "6b26cb83-ee71-4f0a-ae59-ed1cedca47c5",
+      "id": "7de3f727-2f78-4d9e-a833-45371af729d5",
       "name": "Sticky Note21"
     },
     {
@@ -78,10 +78,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1424,
-        416
+        17136,
+        7504
       ],
-      "id": "48eaa264-31ce-46bf-aa1a-f1eb509b53fe",
+      "id": "03c619c2-a694-4929-9a7e-30a582d3dc05",
       "name": "Sticky Note20",
       "disabled": true
     },
@@ -139,10 +139,10 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.1,
       "position": [
-        -224,
-        896
+        18336,
+        7984
       ],
-      "id": "d3c9ea67-2f16-4a6f-97ef-6024dfc5ed8a",
+      "id": "4ec94b8b-e091-4f73-b003-345e62a6a768",
       "name": "Query Knowledge Graph1",
       "retryOnFail": true,
       "maxTries": 5,
@@ -156,10 +156,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        -880,
-        896
+        17680,
+        7984
       ],
-      "id": "1bf0017a-7ec9-4d41-9729-ef6dffff45fd",
+      "id": "77b9d649-506f-45f7-9745-ef0adabd7c25",
       "name": "Supabase Short-Term Memory2",
       "credentials": {
         "postgres": {
@@ -183,10 +183,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -992,
-        640
+        17568,
+        7728
       ],
-      "id": "e307f1c9-1e77-498e-a4a1-58df9880dd3b",
+      "id": "67db25dc-87e3-48ac-a4b5-1eead9c64bd9",
       "name": "Get Long Term Memories",
       "disabled": true
     },
@@ -197,10 +197,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        -80,
-        704
+        18480,
+        7792
       ],
-      "id": "7dde33c4-0415-4551-abfe-ce9799192a2a",
+      "id": "4ee08aaf-604c-4f8a-8660-4b87fea3094e",
       "name": "Respond to Webhook",
       "disabled": true
     },
@@ -221,10 +221,10 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        -1248,
-        640
+        17312,
+        7728
       ],
-      "id": "7d323553-e356-40d9-ba61-33aa68997f45",
+      "id": "0131c2ee-2778-4c34-86ac-09c11d4667f9",
       "name": "user_id",
       "disabled": true
     },
@@ -237,11 +237,11 @@
       },
       "type": "n8n-nodes-base.stickyNote",
       "position": [
-        -1328,
-        816
+        17232,
+        7904
       ],
       "typeVersion": 1,
-      "id": "c708640c-a653-4b3d-9450-ab788a9b5e60",
+      "id": "cf2cf6a5-bab3-46a6-afb4-c26a5a4168f0",
       "name": "Sticky Note25",
       "disabled": true
     },
@@ -254,10 +254,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1312,
-        560
+        17248,
+        7648
       ],
-      "id": "bc199b16-cb20-4506-b4c3-7cdfeaffe871",
+      "id": "a29557cd-fe5b-451d-b1a7-b74c77bdb2fe",
       "name": "Sticky Note26",
       "disabled": true
     },
@@ -272,10 +272,10 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.5,
       "position": [
-        -560,
-        896
+        18000,
+        7984
       ],
-      "id": "3bbf17a5-4239-41d5-9ce4-288dab89293d",
+      "id": "d260c6d1-91ff-4d99-80ed-9fcd2bab0888",
       "name": "Query Tabular Rows1",
       "credentials": {
         "postgres": {
@@ -321,10 +321,10 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.5,
       "position": [
-        -720,
-        896
+        17840,
+        7984
       ],
-      "id": "e25baaa1-7955-4d20-b884-3b4f90a22750",
+      "id": "dee1518c-681c-458b-89a9-f1e0245a54f9",
       "name": "Get datasets from record_manager1",
       "credentials": {
         "postgres": {
@@ -348,10 +348,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        384,
-        752
+        18944,
+        7840
       ],
-      "id": "ab34f578-fb62-414f-804f-eadafcca57f0",
+      "id": "4fd847c4-7c83-4eb8-8f4f-4c1b29c3e500",
       "name": "Create Zep User",
       "disabled": true
     },
@@ -364,10 +364,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        320,
-        608
+        18880,
+        7696
       ],
-      "id": "ad54621d-ce84-45a1-bc62-d7b59b572859",
+      "id": "0cb7379b-3cd8-4dd1-97af-c7404ac86345",
       "name": "Sticky Note27",
       "disabled": true
     },
@@ -426,10 +426,10 @@
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
       "position": [
-        -80,
-        496
+        18480,
+        7584
       ],
-      "id": "1f425ff5-37fd-43e0-94fe-b1802f04e8dc",
+      "id": "28eff85d-8c2f-4a53-be79-95d66d048385",
       "name": "Execute workflow - Save Zep long term memories",
       "disabled": true
     },
@@ -444,10 +444,10 @@
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
       "typeVersion": 1.3,
       "position": [
-        -4512,
-        592
+        14048,
+        7680
       ],
-      "id": "425e89f0-b9de-4914-8b59-8eff7b33b326",
+      "id": "ed1dc4b5-ebe9-466c-a294-26737593a585",
       "name": "When chat message received",
       "webhookId": "5e442826-4547-4647-8d24-1641210f2a8e"
     },
@@ -506,10 +506,10 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.1,
       "position": [
-        -2000,
-        864
+        16560,
+        7952
       ],
-      "id": "ccef2d66-cdb5-473c-bd4b-c6d782c3b91e",
+      "id": "8ae7de5c-2450-46b2-a8d3-9fe7090e00b7",
       "name": "Query Knowledge Graph2",
       "retryOnFail": true,
       "maxTries": 5,
@@ -523,10 +523,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        -2672,
-        864
+        15888,
+        7952
       ],
-      "id": "9a1093f7-b115-44a6-8792-65b10742ad48",
+      "id": "d86907df-5c28-424a-b13c-dd67f9ef91f1",
       "name": "Supabase Short-Term Memory3",
       "credentials": {
         "postgres": {
@@ -547,10 +547,10 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.5,
       "position": [
-        -2352,
-        864
+        16208,
+        7952
       ],
-      "id": "66e27973-0140-49e9-928a-5e4f6a0d02de",
+      "id": "a63d5f8f-80b9-4cf1-b80e-7a42c84a423c",
       "name": "Query Tabular Rows2",
       "credentials": {
         "postgres": {
@@ -596,10 +596,10 @@
       "type": "n8n-nodes-base.postgresTool",
       "typeVersion": 2.5,
       "position": [
-        -2512,
-        864
+        16048,
+        7952
       ],
-      "id": "db31e871-b899-4a75-8c9e-9a3e1c936a31",
+      "id": "5b17eecf-f72f-4d4c-91d4-4331e7a4c18c",
       "name": "Get datasets from record_manager2",
       "credentials": {
         "postgres": {
@@ -619,10 +619,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -2928,
-        416
+        15632,
+        7504
       ],
-      "id": "27870a70-aa08-4060-adb3-51b3a0134d6c",
+      "id": "acb30a3c-d61d-4a13-abd3-0879ee25b10b",
       "name": "Sticky Note"
     },
     {
@@ -634,129 +634,11 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -4704,
-        496
+        13856,
+        7584
       ],
-      "id": "66c2f78d-0fa4-4eb4-b42b-a4e6627d9206",
+      "id": "a0b5308f-7433-46c0-bd25-ffe1bd8d63ec",
       "name": "Sticky Note29"
-    },
-    {
-      "parameters": {
-        "description": "=Call this tool to query data from our knowledgebase using hybrid search (vector, lexical, ilike and fuzzy)\n\nYou can set different weights of this hybrid search depending on the type of query.\n\ndense_weight float DEFAULT 0.5,\nsparse_weight float DEFAULT 0.5,\nilike_weight float DEFAULT 0\nfuzzy_weight float DEFAULT 0\nfuzzy_threshold float DEFAULT 0.8\n\nFor semantic natural lanauge queries you can prioritise dense embeddings, \nFor technical terms and more traditional search you can priorize sparse lexical search\nFor exact matches for codes and IDs you can prioritze ilike wildcard matching\nFor typos that aren't picked up by semantic search, you can prioritize fuzzy matching\n\nIf looking for matches via ilike or fuzzy matches, the query should be extremely focused and short, as otherwise it will likely return zero results. (e.g. exact ID or code)\n\nAs pattern matching and fuzzy matching can add latency, I recommend defaulting this to zero unless you want to actually use it.\n\nTotal of the 4 weights much equal 1\n\nFuzzy Threshold adds significant latency should should be as high as possible - Default to 0.8",
-        "workflowId": {
-          "__rl": true,
-          "value": "R_I-MybamT9nBjj0P-Gg3",
-          "mode": "list",
-          "cachedResultUrl": "/workflow/R_I-MybamT9nBjj0P-Gg3",
-          "cachedResultName": "SOTA RAG Retrieval Sub-Workflow"
-        },
-        "workflowInputs": {
-          "mappingMode": "defineBelow",
-          "value": {
-            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}",
-            "session_id": "={{ $json.sessionId }}",
-            "sparse_weight": "={{ $fromAI('sparse_weight', ``, 'number', 0.5) }}",
-            "dense_weight": "={{ $fromAI('dense_weight', ``, 'number', 0.5) }}",
-            "fuzzy_threshold": "={{ $fromAI('fuzzy_threshold', `this is the word similarity threshold in postgres - lower means more candidates however the call may time out`, 'number', 0.8) }}",
-            "fuzzy_weight": "={{ $fromAI('fuzzy_weight', ``, 'number', 0) }}",
-            "ilike_weight": "={{ $fromAI('ilike_weight', ``, 'number', 0) }}",
-            "type": "hybrid"
-          },
-          "matchingColumns": [],
-          "schema": [
-            {
-              "id": "query",
-              "displayName": "query",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "type",
-              "displayName": "type",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "session_id",
-              "displayName": "session_id",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "string",
-              "removed": false
-            },
-            {
-              "id": "dense_weight",
-              "displayName": "dense_weight",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "number",
-              "removed": false
-            },
-            {
-              "id": "sparse_weight",
-              "displayName": "sparse_weight",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "number",
-              "removed": false
-            },
-            {
-              "id": "ilike_weight",
-              "displayName": "ilike_weight",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "number",
-              "removed": false
-            },
-            {
-              "id": "fuzzy_weight",
-              "displayName": "fuzzy_weight",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "number",
-              "removed": false
-            },
-            {
-              "id": "fuzzy_threshold",
-              "displayName": "fuzzy_threshold",
-              "required": false,
-              "defaultMatch": false,
-              "display": true,
-              "canBeUsedToMatch": true,
-              "type": "number",
-              "removed": false
-            }
-          ],
-          "attemptToConvertTypes": false,
-          "convertFieldsToString": false
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
-      "typeVersion": 2.2,
-      "position": [
-        -3440,
-        864
-      ],
-      "id": "5a87b938-0bb1-4b67-972c-591a55d944f1",
-      "name": "Dynamic Hybrid Search"
     },
     {
       "parameters": {
@@ -771,10 +653,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -2832,
-        864
+        15728,
+        7952
       ],
-      "id": "e09c747c-6a37-44b9-bb9a-5f78e739733c",
+      "id": "02a71b6d-5e3d-4142-ad45-70c84bfa5949",
       "name": "Anthropic Chat Model1",
       "disabled": true
     },
@@ -791,10 +673,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
       "typeVersion": 1.3,
       "position": [
-        -1040,
-        896
+        17520,
+        7984
       ],
-      "id": "d3f733dd-251c-468b-a503-9fb8d2491c45",
+      "id": "c5baf36f-834e-4fe7-869f-090b46f16c80",
       "name": "Anthropic Chat Model2",
       "disabled": true
     },
@@ -910,10 +792,10 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -2176,
-        864
+        16384,
+        7952
       ],
-      "id": "0a1a57ac-713d-4305-8135-2ab0dececf7f",
+      "id": "2d172a06-9ed9-4729-a758-51cbf50303dd",
       "name": "Dynamic Hybrid Search1",
       "disabled": true
     },
@@ -1028,10 +910,10 @@
       "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
       "typeVersion": 2.2,
       "position": [
-        -384,
-        896
+        18176,
+        7984
       ],
-      "id": "2c290b4c-b502-4f77-94d9-6790bd9777c5",
+      "id": "752db5c4-05a6-4c63-bfe3-10e7e6765b42",
       "name": "Dynamic Hybrid Search2",
       "disabled": true
     },
@@ -1053,10 +935,10 @@
       "type": "n8n-nodes-base.supabaseTool",
       "typeVersion": 1,
       "position": [
-        -3280,
-        864
+        15280,
+        7952
       ],
-      "id": "248189ee-d266-46c0-aa0a-f5c24b016be0",
+      "id": "a3a90ed7-0177-4e3a-ae63-7d5ac8ec1944",
       "name": "Fetch Document Hierarchy",
       "credentials": {
         "supabaseApi": {
@@ -1080,10 +962,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -3104,
-        864
+        15456,
+        7952
       ],
-      "id": "e9f0ee0c-9e0c-4237-a53f-27993a4a14ac",
+      "id": "bcb25e6a-e757-41df-86cc-7b00b2fff29f",
       "name": "Context Expansion",
       "credentials": {
         "supabaseApi": {
@@ -1110,10 +992,10 @@
       "type": "n8n-nodes-base.supabaseTool",
       "typeVersion": 1,
       "position": [
-        -1840,
-        864
+        16720,
+        7952
       ],
-      "id": "e0a1e99d-03e3-4da9-be22-fdc71adeab54",
+      "id": "cd1f5079-6f56-4a26-9a00-33aed6a57ec1",
       "name": "Fetch Document Hierarchy1",
       "credentials": {
         "supabaseApi": {
@@ -1138,10 +1020,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        -1664,
-        864
+        16896,
+        7952
       ],
-      "id": "e6efb68d-8470-4512-8aaa-169d510ed730",
+      "id": "ecf7fa43-0522-4a29-b471-3d28328affe2",
       "name": "Context Expansion1",
       "disabled": true
     },
@@ -1163,10 +1045,10 @@
       "type": "n8n-nodes-base.supabaseTool",
       "typeVersion": 1,
       "position": [
-        -64,
-        896
+        18496,
+        7984
       ],
-      "id": "751d1fd5-7dc0-4f10-af4d-9fcd7a40c382",
+      "id": "34513430-d695-4d96-94d3-822ca49aa260",
       "name": "Fetch Document Hierarchy2",
       "credentials": {
         "supabaseApi": {
@@ -1191,10 +1073,10 @@
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        112,
-        896
+        18672,
+        7984
       ],
-      "id": "8650b80c-acda-43c3-b42f-2990d83341a5",
+      "id": "91d73df7-abfb-42ef-a36e-85b224b8f0aa",
       "name": "Context Expansion2",
       "disabled": true
     },
@@ -1209,10 +1091,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.9,
       "position": [
-        -3648,
-        608
+        14912,
+        7696
       ],
-      "id": "37694be2-24ae-4988-b4e8-fc5806e19b12",
+      "id": "0f67afce-37b6-4d88-b237-78c6eb182a31",
       "name": "Agentic RAG 1",
       "retryOnFail": true,
       "maxTries": 5
@@ -1228,10 +1110,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.9,
       "position": [
-        -2464,
-        608
+        16096,
+        7696
       ],
-      "id": "81fa9ed7-bc1c-4646-aef1-8454743eee6c",
+      "id": "37f213e5-dc62-4d6d-8ac3-49785681d5c0",
       "name": "Agentic RAG 2",
       "retryOnFail": true,
       "maxTries": 5,
@@ -1248,10 +1130,10 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.9,
       "position": [
-        -784,
-        640
+        17776,
+        7728
       ],
-      "id": "e9db18a0-a601-4605-8b40-0343e68536ae",
+      "id": "e89c8600-aad3-4eb4-8207-ebbdcf52d656",
       "name": "Agentic RAG 3",
       "retryOnFail": true,
       "maxTries": 5,
@@ -1296,10 +1178,10 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        -3856,
-        1328
+        14704,
+        8416
       ],
-      "id": "6dcd5333-3425-4124-89c0-9eff7e2840ad",
+      "id": "e3de5483-93ec-461d-9484-4c2210fef6d1",
       "name": "When Executed by Another Workflow"
     },
     {
@@ -1326,10 +1208,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1936,
-        1328
+        16624,
+        8416
       ],
-      "id": "19363586-430d-4415-b850-2bb4be300d9a",
+      "id": "528a2c95-2947-450b-a475-8c79cbe05c77",
       "name": "Generate Embedding From Query",
       "credentials": {
         "openAiApi": {
@@ -1361,10 +1243,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -880,
-        1328
+        17680,
+        8416
       ],
-      "id": "5231dbfe-4f1f-4630-9f60-74f940e93306",
+      "id": "82eeee1f-5f41-4ef7-ac47-80e56e62a2b3",
       "name": "Rerank with Cohere 3.5",
       "credentials": {
         "httpHeaderAuth": {
@@ -1381,10 +1263,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1120,
-        1328
+        17440,
+        8416
       ],
-      "id": "5406bb83-8042-476f-94da-936ea19a48b8",
+      "id": "fee7fab9-6c2a-4555-a319-dfcc2a5b1945",
       "name": "Create Array",
       "disabled": true
     },
@@ -1395,10 +1277,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -656,
-        1328
+        17904,
+        8416
       ],
-      "id": "df2019a6-bef9-40a3-aa9d-75ee24933aa2",
+      "id": "bac969d0-1ada-4b72-886b-ea33b4c5f2e3",
       "name": "Return Reordered Items1",
       "disabled": true
     },
@@ -1412,10 +1294,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -2000,
-        1184
+        16560,
+        8272
       ],
-      "id": "9abab0d5-38cf-4754-86e2-9393bca22c67",
+      "id": "1413c48a-e23b-4566-9b2a-b155e565bd50",
       "name": "Sticky Note11"
     },
     {
@@ -1428,10 +1310,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1440,
-        1184
+        17120,
+        8272
       ],
-      "id": "d3c6d8ce-5570-42f5-b539-ca4406e7bf59",
+      "id": "0a079560-dee2-4bf4-bee3-f2bcb5ebcbf3",
       "name": "Sticky Note12",
       "disabled": true
     },
@@ -1463,10 +1345,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -1392,
-        1328
+        17168,
+        8416
       ],
-      "id": "fb0fe563-7eec-4a40-b696-d074c833a9ab",
+      "id": "385fe667-26ec-4f06-9aab-5bbe17ab40c2",
       "name": "If3",
       "alwaysOutputData": false,
       "disabled": true
@@ -1478,10 +1360,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -1120,
-        1552
+        17440,
+        8640
       ],
-      "id": "9f1f7f57-47c0-4e08-bf79-7f3351292aef",
+      "id": "a376ed37-b6b1-4ed6-89ea-b4e8d2d533e4",
       "name": "Code",
       "disabled": true
     },
@@ -1541,10 +1423,10 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        -3664,
-        1328
+        14896,
+        8416
       ],
-      "id": "2c7adf57-541d-449e-bf82-a5907a45f8ae",
+      "id": "0f563eaa-8067-4cb2-81e5-778657891da8",
       "name": "Switch2"
     },
     {
@@ -1561,10 +1443,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -2960,
-        1936
+        15600,
+        9024
       ],
-      "id": "d3bc8b62-c4e0-41ef-a976-d307067a74da",
+      "id": "dc77dd73-db37-4d20-8559-4fa0ce72951c",
       "name": "Query Graph",
       "disabled": true
     },
@@ -1575,10 +1457,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2720,
-        1936
+        15840,
+        9024
       ],
-      "id": "de93f183-4e66-4d04-ad11-facc431089f7",
+      "id": "2e930dfc-f492-4a19-9b08-67e1a72044c2",
       "name": "Tidy up response",
       "disabled": true
     },
@@ -1592,10 +1474,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -3104,
-        1792
+        15456,
+        8880
       ],
-      "id": "35c2abcb-c49d-4171-a4b3-b65ac4204093",
+      "id": "276eb8c1-58a6-4d49-83c4-42c66059605c",
       "name": "Sticky Note13"
     },
     {
@@ -1608,10 +1490,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -3120,
-        1184
+        15472,
+        8272
       ],
-      "id": "8bcc3b81-2a50-4f9e-9e5c-7363b0a94810",
+      "id": "bdc004d6-00af-4be9-97ab-e161867aa252",
       "name": "Sticky Note16"
     },
     {
@@ -1623,10 +1505,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryManager",
       "typeVersion": 1.1,
       "position": [
-        -3408,
-        1296
+        15152,
+        8384
       ],
-      "id": "d0f6f062-c960-4ab5-a844-52fd1432bfb2",
+      "id": "62726327-340d-4d02-b9b1-41d2b79ab54f",
       "name": "Chat Memory Manager",
       "alwaysOutputData": true
     },
@@ -1645,10 +1527,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -2400,
-        1536
+        16160,
+        8624
       ],
-      "id": "81895f02-fb3b-4a8f-a92f-f47c76645905",
+      "id": "d5eff8ca-287e-47fd-938a-62519a500d9f",
       "name": "OpenAI Chat Model4",
       "credentials": {
         "openAiApi": {
@@ -1673,10 +1555,10 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.6,
       "position": [
-        -2384,
-        1312
+        16176,
+        8400
       ],
-      "id": "09aac341-2d4f-4130-9613-12c1f8a6d774",
+      "id": "14e810c2-7125-42c7-8ad5-378ad03fbfad",
       "name": "Prep Metadata1",
       "retryOnFail": true,
       "maxTries": 5
@@ -1689,10 +1571,10 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        -2224,
-        1536
+        16336,
+        8624
       ],
-      "id": "47c1ab50-4e27-493b-b9f2-d20816c498be",
+      "id": "676846a2-4f67-4851-a016-6ee3caed4a56",
       "name": "Structured Output Parser"
     },
     {
@@ -1705,10 +1587,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -3968,
-        1184
+        14592,
+        8272
       ],
-      "id": "549a5dd5-8ab0-42af-b6c4-f7b8c581b9fa",
+      "id": "b602beda-2050-4743-ba88-b7c2d49cddcf",
       "name": "Sticky Note17"
     },
     {
@@ -1719,10 +1601,10 @@
       "type": "n8n-nodes-base.supabase",
       "typeVersion": 1,
       "position": [
-        -3040,
-        1328
+        15520,
+        8416
       ],
-      "id": "3f31f18c-de47-4a31-807e-da22bb10459f",
+      "id": "ba3e0221-d13f-412b-8d75-2c0063475ccc",
       "name": "Fetch Metadata Fields1",
       "alwaysOutputData": true,
       "credentials": {
@@ -1739,10 +1621,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        -2608,
-        1328
+        15952,
+        8416
       ],
-      "id": "313d0174-ccf7-4b47-aecb-3f811da5c39a",
+      "id": "1dd07615-b134-4b43-b0fc-b3cc95e7aa79",
       "name": "Prep1"
     },
     {
@@ -1753,10 +1635,10 @@
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
       "position": [
-        -3312,
-        1488
+        15248,
+        8576
       ],
-      "id": "c33c4b13-a35c-4ff4-8ec3-20e62bdb4fd8",
+      "id": "cf905bbb-aace-48a9-9200-437fbe532e8b",
       "name": "Supabase Short-Term Memory1",
       "credentials": {
         "postgres": {
@@ -1774,10 +1656,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -3040,
-        1840
+        15520,
+        8928
       ],
-      "id": "85f0e201-2fa5-4e16-bfa5-8f07d4c1cd91",
+      "id": "76c8d018-bcac-4196-acfe-4a260620396d",
       "name": "Sticky Note19",
       "disabled": true
     },
@@ -1809,10 +1691,10 @@
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        -2832,
-        1440
+        15728,
+        8528
       ],
-      "id": "51a7866c-43fa-4852-b440-b3d67f22e899",
+      "id": "29e949e5-4eea-4e92-8a9d-727f39181b4d",
       "name": "If"
     },
     {
@@ -1833,10 +1715,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        -1696,
-        1360
+        16864,
+        8448
       ],
-      "id": "1717d199-a5ec-4611-94d3-e21c5d5c6ad5",
+      "id": "291dfd44-7bc3-48bd-88b0-5dece189576f",
       "name": "Trigger Dynamic Hybrid Search",
       "alwaysOutputData": true,
       "credentials": {
@@ -1855,10 +1737,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -1760,
-        1216
+        16800,
+        8304
       ],
-      "id": "a6801af5-c088-405f-adeb-b9e3a47aab2e",
+      "id": "a8b38973-571c-4440-bdba-9c6faa6d7a9e",
       "name": "Sticky Note22"
     },
     {
@@ -1870,10 +1752,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -944,
-        1216
+        17616,
+        8304
       ],
-      "id": "246c49f7-a59c-4e90-8a34-75ee653f5183",
+      "id": "3474cd3a-d2f2-4296-90b2-0285a20c6340",
       "name": "Sticky Note23",
       "disabled": true
     },
@@ -1887,10 +1769,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -4864,
-        1184
+        13696,
+        8272
       ],
-      "id": "cbccb58c-af32-4f03-919a-ad51516caad0",
+      "id": "19310bde-bc89-4d06-8115-6d72bfca4fe0",
       "name": "Sticky Note24"
     },
     {
@@ -1903,10 +1785,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -4704,
-        1552
+        13856,
+        8640
       ],
-      "id": "2cfe88da-0ccb-42a2-83b6-fcea155d87df",
+      "id": "a6f7efc1-a21e-44aa-aede-896a453a34f2",
       "name": "Sticky Note28"
     },
     {
@@ -1918,10 +1800,10 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -4704,
-        1264
+        13856,
+        8352
       ],
-      "id": "1d69166d-1c2f-4149-a54f-00b0d56ad52b",
+      "id": "853e794a-438e-4695-848c-8b423b00542c",
       "name": "Sticky Note30"
     },
     {
@@ -1940,10 +1822,10 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        -3776,
-        880
+        14784,
+        7968
       ],
-      "id": "37f8892a-21c5-4598-99d4-a0e68357b289",
+      "id": "83c65cde-0cf6-4abd-aa26-b4b7f1823564",
       "name": "OpenAI Chat Model",
       "credentials": {
         "openAiApi": {
@@ -1951,6 +1833,124 @@
           "name": "OpenAi account"
         }
       }
+    },
+    {
+      "parameters": {
+        "description": "=Call this tool to query data from our knowledgebase using hybrid search (vector, lexical, ilike and fuzzy)\n\nYou can set different weights of this hybrid search depending on the type of query.\n\ndense_weight float DEFAULT 0.5,\nsparse_weight float DEFAULT 0.5,\nilike_weight float DEFAULT 0\nfuzzy_weight float DEFAULT 0\nfuzzy_threshold float DEFAULT 0.8\n\nFor semantic natural lanauge queries you can prioritise dense embeddings, \nFor technical terms and more traditional search you can priorize sparse lexical search\nFor exact matches for codes and IDs you can prioritze ilike wildcard matching\nFor typos that aren't picked up by semantic search, you can prioritize fuzzy matching\n\nIf looking for matches via ilike or fuzzy matches, the query should be extremely focused and short, as otherwise it will likely return zero results. (e.g. exact ID or code)\n\nAs pattern matching and fuzzy matching can add latency, I recommend defaulting this to zero unless you want to actually use it.\n\nTotal of the 4 weights much equal 1\n\nFuzzy Threshold adds significant latency should should be as high as possible - Default to 0.8",
+        "workflowId": {
+          "__rl": true,
+          "value": "R_I-MybamT9nBjj0P-Gg3",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/R_I-MybamT9nBjj0P-Gg3",
+          "cachedResultName": "Retrieval Sub-Workflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}",
+            "session_id": "={{ $json.sessionId }}",
+            "sparse_weight": "={{ $fromAI('sparse_weight', ``, 'number', 0.5) }}",
+            "dense_weight": "={{ $fromAI('dense_weight', ``, 'number', 0.5) }}",
+            "fuzzy_threshold": "={{ $fromAI('fuzzy_threshold', `this is the word similarity threshold in postgres - lower means more candidates however the call may time out`, 'number', 0.8) }}",
+            "fuzzy_weight": "={{ $fromAI('fuzzy_weight', ``, 'number', 0) }}",
+            "ilike_weight": "={{ $fromAI('ilike_weight', ``, 'number', 0) }}",
+            "type": "hybrid"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "dense_weight",
+              "displayName": "dense_weight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "sparse_weight",
+              "displayName": "sparse_weight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "ilike_weight",
+              "displayName": "ilike_weight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "fuzzy_weight",
+              "displayName": "fuzzy_weight",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "fuzzy_threshold",
+              "displayName": "fuzzy_threshold",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        15136,
+        7968
+      ],
+      "id": "532aa8d8-f0fc-4274-9080-118c4dbd56f2",
+      "name": "Dynamic Hybrid Search3"
     }
   ],
   "pinData": {},
@@ -2059,17 +2059,6 @@
         [
           {
             "node": "Agentic RAG 2",
-            "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Dynamic Hybrid Search": {
-      "ai_tool": [
-        [
-          {
-            "node": "Agentic RAG 1",
             "type": "ai_tool",
             "index": 0
           }
@@ -2431,16 +2420,30 @@
           }
         ]
       ]
+    },
+    "Dynamic Hybrid Search3": {
+      "ai_tool": [
+        [
+          {
+            "node": "Agentic RAG 1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
-    "availableInMCP": false
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": "any"
   },
-  "versionId": "1ecc59d4-bbdb-40cf-b68b-1ffc84ea0ff6",
+  "versionId": "a5eae888-34b3-4bc2-93e1-074bc12b2587",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "eaa3d31df30f69d853bf1887372824077726204755d7d83df055afd95f72246a"
   },
   "id": "R_I-MybamT9nBjj0P-Gg3",
@@ -2450,6 +2453,12 @@
       "createdAt": "2026-02-15T11:24:51.266Z",
       "id": "OEoaSAg7UTdJYuMl",
       "name": "BVIJ"
+    },
+    {
+      "updatedAt": "2026-02-15T13:10:47.882Z",
+      "createdAt": "2026-02-15T13:10:47.882Z",
+      "id": "Z2OUf4P51HExgS2t",
+      "name": "DEV"
     }
   ]
 }

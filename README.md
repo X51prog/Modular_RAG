@@ -140,6 +140,12 @@ Called by the retrieval workflow to persist conversation context:
 
 ## Changelog
 
+### v1.6 - 2025-02-15
+- **Fixed Dynamic Hybrid Search** — replaced broken self-referencing tool node (had invalid workflow ID `R_I-MybamT9nBjj0P-Gg3/29b9d5` and malformed expressions) with new `Dynamic Hybrid Search3` node using correct ID and clean `$fromAI()` mappings
+- Set retrieval workflow **callerPolicy to `any`** so sub-workflow calls are not blocked
+- Updated credential references to match live n8n instance (Mistral, Google Drive, Supabase)
+- Synced both workflows from live n8n exports
+
 ### v1.5.2 - 2025-02-15
 - Enabled `send_tabular_data_to_vector_store = true` so Excel/CSV/Sheets data gets embedded into the vector store for retrieval
 
