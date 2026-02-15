@@ -46,10 +46,10 @@ A production-grade n8n RAG (Retrieval-Augmented Generation) system composed of 5
 
 | Category | Formats |
 |----------|---------|
-| Text | Plain Text, Markdown |
-| Documents | Google Docs, PDF, HTML, Word (.doc/.docx), PowerPoint, RTF, EPUB, and more |
+| Text | Plain Text (.txt), Markdown (.md) |
+| Documents | Google Docs, PDF, HTML |
 | Spreadsheets | Excel (.xlsx), CSV, Google Sheets |
-| Media | Images (JPEG, PNG, GIF, etc.), Audio (MP3, WAV), Video (MP4, WebM) |
+| Requires LlamaParse (disabled) | Word (.doc/.docx), PowerPoint, RTF, EPUB, Images, Audio, Video |
 
 ### Key Features
 
