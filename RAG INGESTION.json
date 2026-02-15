@@ -449,7 +449,7 @@
             {
               "id": "be837843-d308-4b1a-88f1-a6b20cc66029",
               "name": "send_tabular_data_to_vector_store",
-              "value": false,
+              "value": true,
               "type": "boolean"
             },
             {

@@ -140,6 +140,9 @@ Called by the retrieval workflow to persist conversation context:
 
 ## Changelog
 
+### v1.5.2 - 2025-02-15
+- Enabled `send_tabular_data_to_vector_store = true` so Excel/CSV/Sheets data gets embedded into the vector store for retrieval
+
 ### v1.5.1 - 2025-02-15
 - Reverted **Cohere reranking** pipeline back to disabled (caused infinite hang — needs Cohere API key setup)
 
