@@ -141,10 +141,13 @@ Called by the retrieval workflow to persist conversation context:
 ## Changelog
 
 ### v0.1.7 - 2025-02-15
-- **Fixed public chat URL** — disabled streaming on chat trigger (`responseStreamingAllowed: false`) to resolve "No response received" error
+- **Fixed public chat URL** — set chat trigger response mode to `lastNode` to resolve "No response received" streaming error
 - **Multi-language support** — replaced vague language instruction with explicit rule: respond in the same language the user writes in
+- **Recycling Bin check interval** — reduced from 10 min to 2 min for faster document deletion
+- Chat greeting now shows version number (`v0.1.7`)
 - Added **User Manual** (`USER MANUAL.md`) for end users
 - Corrected **supported file types** — Word, PowerPoint, RTF, EPUB, images, audio, video require LlamaParse (disabled)
+- Synced both workflows from live n8n exports
 
 ### v0.1.6 - 2025-02-15
 - **Fixed Dynamic Hybrid Search** — replaced broken self-referencing tool node (had invalid workflow ID `R_I-MybamT9nBjj0P-Gg3/29b9d5` and malformed expressions) with new `Dynamic Hybrid Search3` node using correct ID and clean `$fromAI()` mappings

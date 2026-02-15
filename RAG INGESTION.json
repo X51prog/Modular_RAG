@@ -3950,7 +3950,7 @@
           "interval": [
             {
               "field": "minutes",
-              "minutesInterval": 10
+              "minutesInterval": 2
             }
           ]
         }
@@ -5408,7 +5408,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "415d74ae-75f7-4b75-9559-8c8a0a5b655c",
+  "versionId": "2c89064b-77d9-4ef3-aa0a-2b12eea66b9b",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "eaa3d31df30f69d853bf1887372824077726204755d7d83df055afd95f72246a"

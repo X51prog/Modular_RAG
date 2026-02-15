@@ -437,10 +437,9 @@
       "parameters": {
         "public": true,
         "authentication": "n8nUserAuth",
-        "initialMessages": "Hi there! 👋\n",
-        "availableInChat": true,
+        "initialMessages": "v0.1.7👋\n",
         "options": {
-          "responseStreamingAllowed": false
+          "responseMode": "lastNode"
         }
       },
       "type": "@n8n/n8n-nodes-langchain.chatTrigger",
@@ -2443,7 +2442,7 @@
     "timeSavedMode": "fixed",
     "callerPolicy": "any"
   },
-  "versionId": "a5eae888-34b3-4bc2-93e1-074bc12b2587",
+  "versionId": "94f14f0e-399b-483e-87ed-9f800b8e0b8c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "eaa3d31df30f69d853bf1887372824077726204755d7d83df055afd95f72246a"
@@ -2451,10 +2450,10 @@
   "id": "R_I-MybamT9nBjj0P-Gg3",
   "tags": [
     {
-      "updatedAt": "2026-02-15T11:24:51.266Z",
-      "createdAt": "2026-02-15T11:24:51.266Z",
-      "id": "OEoaSAg7UTdJYuMl",
-      "name": "BVIJ"
+      "updatedAt": "2026-02-15T11:24:19.214Z",
+      "createdAt": "2026-02-15T11:24:19.214Z",
+      "id": "0wTBNFMNGqp6FfEa",
+      "name": "Claude BVIJ"
     },
     {
       "updatedAt": "2026-02-15T13:10:47.882Z",
