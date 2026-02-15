@@ -140,53 +140,53 @@ Called by the retrieval workflow to persist conversation context:
 
 ## Changelog
 
-### v1.7 - 2025-02-15
+### v0.1.7 - 2025-02-15
 - **Fixed public chat URL** — disabled streaming on chat trigger (`responseStreamingAllowed: false`) to resolve "No response received" error
 - **Multi-language support** — replaced vague language instruction with explicit rule: respond in the same language the user writes in
 - Added **User Manual** (`USER MANUAL.md`) for end users
 - Corrected **supported file types** — Word, PowerPoint, RTF, EPUB, images, audio, video require LlamaParse (disabled)
 
-### v1.6 - 2025-02-15
+### v0.1.6 - 2025-02-15
 - **Fixed Dynamic Hybrid Search** — replaced broken self-referencing tool node (had invalid workflow ID `R_I-MybamT9nBjj0P-Gg3/29b9d5` and malformed expressions) with new `Dynamic Hybrid Search3` node using correct ID and clean `$fromAI()` mappings
 - Set retrieval workflow **callerPolicy to `any`** so sub-workflow calls are not blocked
 - Updated credential references to match live n8n instance (Mistral, Google Drive, Supabase)
 - Synced both workflows from live n8n exports
 
-### v1.5.2 - 2025-02-15
+### v0.1.5.2 - 2025-02-15
 - Enabled `send_tabular_data_to_vector_store = true` so Excel/CSV/Sheets data gets embedded into the vector store for retrieval
 
-### v1.5.1 - 2025-02-15
+### v0.1.5.1 - 2025-02-15
 - Reverted **Cohere reranking** pipeline back to disabled (caused infinite hang — needs Cohere API key setup)
 
-### v1.5 - 2025-02-15
+### v0.1.5 - 2025-02-15
 - **Anti-hallucination improvements** to RAG Retrieval Sub-Workflow:
-  - ~~Enabled Cohere rerank-v3.5 pipeline~~ (reverted in v1.5.1)
+  - ~~Enabled Cohere rerank-v3.5 pipeline~~ (reverted in v0.1.5.1)
   - Set agent model (GPT-5.2) **temperature to 0.1** for more factual responses
   - Strengthened **system prompt** with inline citation rules, grounding requirements, and partial-answer handling
 
-### v1.4 - 2025-02-15
+### v0.1.4 - 2025-02-15
 - Enabled **CSV** file support (Extract from CSV node)
 - Enabled **Google Sheets** support (Get google sheet info + Get row(s) in sheet) with OAuth2 credentials
 - Enabled **Webpage Markdown** processing node
 
-### v1.3 - 2025-02-15
+### v0.1.3 - 2025-02-15
 - Added **RAG Retrieval Sub-Workflow** (v2.3.3) — agentic retrieval with dynamic hybrid search
 - Added **Knowledge Graph Workflow** (LightRAG v1.1) — knowledge graph sub-workflow
 - Added **Multimodal RAG Ingestion Sub-workflow** (v1.2) — OCR and image processing
 - Added **Zep Update Long-Term Memories Sub-workflow** — conversation persistence
 - Updated README to document full system architecture
 
-### v1.2 - 2025-02-15
+### v0.1.2 - 2025-02-15
 - Enabled **Google Docs** support (Get a document node) with OAuth2 credentials
 - Added credential bindings for LlamaParse nodes (Get Processing Status, Get parsed document)
 - Preserved existing Supabase credential on Update our Record Manager
 
-### v1.1 - 2025-02-15
+### v0.1.1 - 2025-02-15
 - Enabled **Plain Text** file support (Extract from text file node)
 - Enabled **Excel** file support with full pipeline:
   - Extract from Excel -> Aggregate3 -> Array keys + Summarize -> Merge -> Set Text for Tabular Data
 
-### v1.0 - Initial
+### v0.1.0 - Initial
 - Core RAG ingestion pipeline with Google Drive integration
 - Support for Markdown, Google Docs, PDF, HTML, CSV, Google Sheets, and other document types
 - Hierarchical markdown-aware chunking with configurable sizes
