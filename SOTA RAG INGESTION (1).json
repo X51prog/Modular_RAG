@@ -1,0 +1,5401 @@
+{
+  "name": "SOTA RAG INGESTION",
+  "nodes": [
+    {
+      "parameters": {
+        "type": "SHA256",
+        "value": "={{ $json.text }}",
+        "dataPropertyName": "hash"
+      },
+      "type": "n8n-nodes-base.crypto",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        4912
+      ],
+      "id": "25d46b1a-1731-4095-8421-541b67f91dbf",
+      "name": "Generate Hash"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "record_manager_v2",
+        "limit": 1,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "doc_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Set Data').first().json.doc_id }}"
+            },
+            {
+              "keyName": "hash",
+              "condition": "eq",
+              "keyValue": "={{ $json.hash }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1696,
+        4912
+      ],
+      "id": "e9bb6c63-6c8c-46bb-aa37-ef4c76b5a56c",
+      "name": "Search Record Manager",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "record_manager_v2",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "doc_id",
+              "fieldValue": "={{ $('Set Data').first().json.doc_id }}"
+            },
+            {
+              "fieldId": "hash",
+              "fieldValue": "={{ $('Generate Hash').item.json.hash }}"
+            },
+            {
+              "fieldId": "graph_id",
+              "fieldValue": "={{ $json.foundDocumentId }}"
+            },
+            {
+              "fieldId": "data_type",
+              "fieldValue": "={{ $('Set Text (Merged)').first().json.data_type }}"
+            },
+            {
+              "fieldId": "schema",
+              "fieldValue": "={{ $('Set Text (Merged)').first().json.array_keys || null }}"
+            },
+            {
+              "fieldId": "document_title",
+              "fieldValue": "={{ $('Set Data').first().json.doc_name }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2832,
+        4784
+      ],
+      "id": "87315563-518e-4729-9b25-8319a492f51f",
+      "name": "Create Row in Record Manager",
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1008,
+        1376
+      ],
+      "id": "ff2e21b8-f50c-4980-a7b0-f9ed7ef139ef",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "documents_v2",
+        "filterType": "string",
+        "filterString": "=metadata->>doc_id=like.*{{ $('Loop Over Items').item.json.id }}*"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        5072
+      ],
+      "id": "fbb91a7a-a8b9-4b44-bc38-e7fa354e5e53",
+      "name": "Delete Previous Vectors",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "record_manager_v2",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Search Record Manager').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "hash",
+              "fieldValue": "={{ $('Generate Hash').item.json.hash }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "processing"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3040,
+        5072
+      ],
+      "id": "bb5d1826-2519-4532-9c74-7c4bcc66f3e4",
+      "name": "Update our Record Manager",
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "jVKqKGrbbZjNGXQ8",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2816,
+        5072
+      ],
+      "id": "147c2fb6-c3d7-463d-bcc2-2d701d258a76",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a27d8259-8ed2-4638-8716-b60119b8f90c",
+              "name": "text",
+              "value": "={{ $json.content || $json.text || $json.markdown}}",
+              "type": "string"
+            },
+            {
+              "id": "57ffce94-6b26-426f-9891-cd436002bf6d",
+              "name": "data_type",
+              "value": "unstructured",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        7968,
+        1728
+      ],
+      "id": "30444d81-d5a8-4929-a395-e03fa4e9243f",
+      "name": "Set Text"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "90016f21-d4be-4e57-a81a-5fe290f388b9",
+              "name": "content",
+              "value": "={{ $('Set Text (Merged)').item.json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "6e2ac31c-3626-4a48-8816-51a77601261b",
+              "name": "custom_metadata",
+              "value": "={{ $json.output }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5424,
+        5024
+      ],
+      "id": "4d650602-b8bc-4352-b4cb-faa8aac89975",
+      "name": "Set up Text for Embedding"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "content",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        5568,
+        1776
+      ],
+      "id": "f183ebf5-99c2-47d8-ba25-fb29c9edfc83",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mistral.ai/v1/files",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mistralCloudApi",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "purpose",
+              "value": "ocr"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5552,
+        1392
+      ],
+      "id": "6028db23-5fe0-4ba1-8b2b-1882b7f192af",
+      "name": "Upload File",
+      "retryOnFail": true,
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "Z91uOlo3ymd8UaZz",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1KXZxkSFAiImmM-BdEAZz_-8UR8clAGKC",
+          "mode": "list",
+          "cachedResultName": "Rag Files",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1KXZxkSFAiImmM-BdEAZz_-8UR8clAGKC"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        528,
+        1376
+      ],
+      "id": "e03f7fc5-36d5-4dc6-8e80-4211160e900c",
+      "name": "New Files",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VDLj39UaaNWpXOn5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1KXZxkSFAiImmM-BdEAZz_-8UR8clAGKC",
+          "mode": "list",
+          "cachedResultName": "Rag Files",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1KXZxkSFAiImmM-BdEAZz_-8UR8clAGKC"
+        },
+        "event": "fileUpdated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        528,
+        1616
+      ],
+      "id": "67da1c12-915b-4a62-9dda-52a750e65d48",
+      "name": "Updated Files",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VDLj39UaaNWpXOn5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.firecrawl.dev/v1/crawl",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"url\": \"https://www.theaiautomators.com/blog/\",\n  \"limit\": 5,\n  \"webhook\": {\n    \"url\": \"<ADD WEBHOOK>\",\n    \"events\": [\n      \"page\"\n    ]\n  },\n  \"scrapeOptions\": {\n    \"formats\": [\n      \"markdown\"\n    ]\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        -48
+      ],
+      "id": "c53848fb-65c1-4bd3-822e-3d2f4d5457b1",
+      "name": "Trigger Firecrawl",
+      "retryOnFail": false,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "788b2977-a0b3-4393-9dd2-047ca9a10cb7",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        704
+      ],
+      "id": "c1fbcfe5-5750-4874-8942-e6f0f703c77e",
+      "name": "Webhook",
+      "webhookId": "788b2977-a0b3-4393-9dd2-047ca9a10cb7"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d0f85312-1655-44ed-ab5d-4db71c7b3f03",
+              "name": "lightrag_enabled",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "31b25dec-c322-4862-85cd-1746156618fd",
+              "name": "multimodal_rag_enabled",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "9d686a90-a000-415f-99cd-056798d561f7",
+              "name": "ocr_enabled",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "6e9b9a47-9dc9-4912-8833-c934ec3e5d89",
+              "name": "contextual_embedding_enabled",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "be837843-d308-4b1a-88f1-a6b20cc66029",
+              "name": "send_tabular_data_to_vector_store",
+              "value": false,
+              "type": "boolean"
+            },
+            {
+              "id": "fdba4635-3d3a-46fe-84f2-a0797cc5d81d",
+              "name": "llamaparse_max_polling_attempts",
+              "value": 200,
+              "type": "number"
+            },
+            {
+              "id": "39bd7383-0385-459d-85d4-126bc25347ca",
+              "name": "doc_id",
+              "value": "={{ $json.id || $json.body.data[0].metadata.url }}",
+              "type": "string"
+            },
+            {
+              "id": "eabda515-4cc4-49c9-9299-88aa34071946",
+              "name": "doc_name",
+              "value": "={{ $json.name || $json.body.data[0].metadata.title }}",
+              "type": "string"
+            },
+            {
+              "id": "464bcef6-ec45-44fd-aa9e-49bd3ecf6bf6",
+              "name": "doc_type",
+              "value": "={{ $('Webhook').isExecuted ? \"webpage\" : \"file\" }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1376,
+        1472
+      ],
+      "id": "21203971-b3d1-4a79-97c1-27855584a414",
+      "name": "Set Data"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4db8114c-c34f-4bc6-8c9e-78d7388e9b56",
+              "leftValue": "={{ $json.body.data[0].markdown.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1376,
+        704
+      ],
+      "id": "1914fd92-8d3c-404e-94fe-8213203cf7db",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Set Data').first().json.doc_id }}",
+          "mode": "id"
+        },
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1ahsEep9eSvmc0kkb-6w6wHPxtkFPk8M_",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        528,
+        2384
+      ],
+      "id": "60b029c1-ae4b-47cb-a9dd-8205024a446e",
+      "name": "Archive File",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VDLj39UaaNWpXOn5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "months",
+              "monthsInterval": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        -48
+      ],
+      "id": "80ed7846-8704-4c39-9887-768a6e62f98d",
+      "name": "Schedule Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "batchSize": 200,
+        "options": {
+          "reset": "={{ $node['Loop over Chunks'].context.done }}"
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        6336,
+        5024
+      ],
+      "id": "02b323f4-5ddd-45a1-90db-e55c51b0bb4d",
+      "name": "Loop over Chunks"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "dcd400bc-0b91-4c30-81bd-da402e4a2730",
+                    "leftValue": "={{ $json.hash }}",
+                    "rightValue": "={{ $('Generate Hash').item.json.hash }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "empty",
+                      "singleValue": true
+                    },
+                    "id": "ad01f150-f021-454c-aa13-eea5b26c2cba"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ca0c7ef8-09f9-4424-947b-8469b1ed8cac",
+                    "leftValue": "={{ $json.hash }}",
+                    "rightValue": "={{ $('Generate Hash').item.json.hash }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEquals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1872,
+        4880
+      ],
+      "id": "0dcb115e-0ee2-4ef7-b141-ce30bbe0bb84",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        7424,
+        5424
+      ],
+      "id": "3498644f-8c54-4daa-a6e7-044854937868",
+      "name": "Aggregate2"
+    },
+    {
+      "parameters": {
+        "content": "# Knowledge Graph Updates",
+        "height": 472,
+        "width": 1508,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3328,
+        3904
+      ],
+      "id": "d30ff611-24c6-4b45-b3ca-7b647e8fb006",
+      "name": "Sticky Note14",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"title\": \"Generic Object with String or Number Values\",\n  \"type\": \"object\",\n  \"additionalProperties\": {\n    \"type\": [\"string\", \"number\"]\n  }\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        5040,
+        4816
+      ],
+      "id": "8f989f12-6586-467f-bd5c-0e7fa03ce717",
+      "name": "Structured Output Parser2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4880,
+        4816
+      ],
+      "id": "f4e4d634-7fe0-40ee-8a2d-6822d0de87e5",
+      "name": "OpenAI Chat Model3",
+      "credentials": {
+        "openAiApi": {
+          "id": "r6dwaEmQxKEvrskM",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "metadata_fields"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4176,
+        4880
+      ],
+      "id": "c654791c-2f80-464f-94fd-c9355d2e6679",
+      "name": "Fetch Metadata Fields",
+      "retryOnFail": true,
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get input items\nconst items = $input.all();\n\n// Initialize output string and list of fields\nlet output = '';\nlet fieldList = '';\n\n// Loop through each input item\nfor (const item of items) {\n  const data = item.json;\n\n  const key = data.metadata_name;\n  const values = data.allowed_values;\n\n  output += `## ${key}\\n`;\n  output += `The filter key ${key} can have the following possible values\\n\\n`;\n  output += `${values.trim()}\\n\\n`;\n\n  fieldList += `\"${key}\":\"<ADD>\",\\n`;\n}\n\n// Remove trailing comma and newline from fieldList\nfieldList = fieldList.trim().replace(/,\\s*$/, '');\n\n// Take the first item and modify it with aggregated data\nconst firstItem = items[0];\nfirstItem.json.filterPromptInstructions = output.trim();\nfirstItem.json.list_of_fields = fieldList;\n\n// Return only the first item (now containing aggregated data)\nreturn [firstItem];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4560,
+        4640
+      ],
+      "id": "4305b5b5-3157-4e40-a993-e65c42b6552a",
+      "name": "Prep"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=# File Name\n{{ $('Set Data').item.json.doc_name }}\n##################\n# File Contents\n{{ \n$('Set Text (Merged)').first().json.text.length > 10000 \n    ? $('Set Text (Merged)').first().json.text.substring(0, 10000) + '...' \n    : $('Set Text (Merged)').first().json.text \n}}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Based on the provided file name and file contents, extract out ...\n\n# headline-style description\n\nA very short, headline-style description (7-10 words). This will be used to finish the sentence \"This chunk is from\" so start it with \"an\" or \"a\"... example output\n\nan SEC filing on ACME corp's performance in Q2 2023\n\n# document summary\n\nAlso extract out a 1 sentence description of what the document is about and classify the document according to the below fields.\n\nOnly output JSON in the following format\n\n{\n\"document_headline_description\":\"<ADD>\",\n\"document_summary\":\"<ADD>\",\n{{ $json.list_of_fields ? $json.list_of_fields : \"\" }}\n}\n\nIf you are unsure of any of these, just output N/A in the field.\n\n{{ $json.list_of_fields ? $json.filterPromptInstructions : \"\" }}"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        4896,
+        4608
+      ],
+      "id": "4fc0e6b2-c440-43cf-8e77-d289eba4be68",
+      "name": "Enrich",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Set Data').first().json.lightrag_enabled }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "ff677730-3b6a-41af-b46e-69c0610d9ea2"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "If LightRAG enabled"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ba8b00e1-09f7-4729-a3f2-1a0526e1b9f8",
+                    "leftValue": "1",
+                    "rightValue": "1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Always execute"
+            }
+          ]
+        },
+        "options": {
+          "allMatchingOutputs": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3856,
+        4752
+      ],
+      "id": "97126d0e-10b4-4c1d-95f5-865cd3a33fbc",
+      "name": "Is LightRAG enabled?"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Set Data').first().json.lightrag_enabled }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    },
+                    "id": "ff677730-3b6a-41af-b46e-69c0610d9ea2"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "If LightRAG enabled"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "918f53c3-a48f-4cf4-a005-2c3c6e43da39",
+                    "leftValue": "1",
+                    "rightValue": "1",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Always execute"
+            }
+          ]
+        },
+        "options": {
+          "allMatchingOutputs": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3440,
+        4192
+      ],
+      "id": "27e5340d-4d9b-4912-a441-a79ce6dd6307",
+      "name": "Is LightRAG enabled?1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4a63774b-98fb-4f42-af92-5bf4ff6017ca",
+              "leftValue": "={{ $('Set Data').item.json.multimodal_rag_enabled }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4560,
+        1328
+      ],
+      "id": "1be5c56d-d5c6-47f7-97ae-56eab27fd5c5",
+      "name": "Is Multimodal enabled?"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "documentURL": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 2,
+      "position": [
+        5264,
+        912
+      ],
+      "id": "d2d8f10f-56cb-4152-9462-2134e47bebdf",
+      "name": "Get a document",
+      "retryOnFail": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "id": "941b6fdc-f7a8-4ad0-a4b4-ba5d1cb66fbf",
+      "name": "Extract from Excel",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        5344,
+        2784
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        5344,
+        2576
+      ],
+      "id": "b0197920-c83d-463c-bd6a-60aa4cb1dc8a",
+      "name": "Extract from CSV",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "aggregation": "concatenate",
+              "field": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a4d5c51b-f40d-4c51-987a-7d640c160bd0",
+      "name": "Summarize",
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1,
+      "position": [
+        6800,
+        2720
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "={{ $('Loop Over Items').item.json.id }}",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $json.sheets[0].properties.sheetId }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        5344,
+        2992
+      ],
+      "id": "87b688fa-9901-41bb-9d34-bb031749022a",
+      "name": "Get row(s) in sheet",
+      "retryOnFail": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "98ed8f1b-f706-4829-8010-cf33b8eaf1d2",
+              "name": "array_keys",
+              "value": "={{ $json.data.first().keys() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        6800,
+        2528
+      ],
+      "id": "ddae5096-9702-41fb-9f51-ee6f3d8ce24a",
+      "name": "Array keys",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        7216,
+        2592
+      ],
+      "id": "cfcf24f2-2d96-4347-8a5a-340b3d9dbdfc",
+      "name": "Merge",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a27d8259-8ed2-4638-8716-b60119b8f90c",
+              "name": "text",
+              "value": "={{ $json.concatenated_data }}",
+              "type": "string"
+            },
+            {
+              "id": "ccab898b-7018-41cf-9418-ccfca0509259",
+              "name": "array_keys",
+              "value": "={{ $json.array_keys }}",
+              "type": "string"
+            },
+            {
+              "id": "6b696d19-a500-46e4-92a6-4b0148ddb153",
+              "name": "data_type",
+              "value": "tabular",
+              "type": "string"
+            },
+            {
+              "id": "c91004d6-3bcc-4542-ad90-8eea6bd78707",
+              "name": "data_rows",
+              "value": "={{ $('Aggregate3').item.json.data }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        7696,
+        2592
+      ],
+      "id": "b542fdc9-821a-49ad-88ad-10eebd4f5a17",
+      "name": "Set Text for Tabular Data",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://sheets.googleapis.com/v4/spreadsheets/{{ $('Loop Over Items').item.json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleSheetsOAuth2Api",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4400,
+        2736
+      ],
+      "id": "2b524a4d-ad42-421c-86d1-12e411958dcd",
+      "name": "Get google sheet info",
+      "retryOnFail": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "include": "allFieldsExcept",
+        "fieldsToExclude": "row_number",
+        "options": {}
+      },
+      "id": "6625844e-31da-4b75-b4b1-2a9774ef651d",
+      "name": "Aggregate3",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        6528,
+        2640
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "01e6c26b-2cd8-4280-bcd6-b714a6f6f8fb",
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "text/plain",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Plain Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "f0c334e4-fd56-4768-8c9b-31b4e1e39b04",
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "text/markdown",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Markdown"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "application/vnd.google-apps.document",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "9e010d7f-0552-4a06-9566-e3031ffae240"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Google Docs"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "ddac5320-959a-4634-9000-c9cdc397d2e4",
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "application/pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PDF"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b94191c9-1f29-4558-a4ac-3a74e9f5d88f",
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "text/html",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HTML"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "296bdf72-6d94-487b-9276-66bbee45c801",
+                    "leftValue": "={{ [\n  // Documents / Presentations / Spreadsheets\n  \"application/x-t602\",                          // 602\n  \"application/x-abiword\",                       // abw, zabw\n  \"image/cgm\",                                   // cgm\n  \"application/x-appleworks\",                    // cwk\n  \"application/msword\",                          // doc\n  \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\", // docx\n  \"application/vnd.ms-word.document.macroEnabled.12\", // docm\n  \"application/msword\",                          // dot\n  \"application/vnd.ms-word.template.macroEnabled.12\", // dotm\n  \"application/x-hwp\",                           // hwp\n  \"application/vnd.apple.keynote\",               // key\n  \"application/vnd.lotus-wordpro\",               // lwp\n  \"application/x-mw\",                            // mw\n  \"application/x-mcw\",                           // mcw\n  \"application/vnd.apple.pages\",                 // pages\n  \"application/vnd.powerbuilder6\",               // pbd\n  \"application/vnd.ms-powerpoint\",               // ppt\n  \"application/vnd.ms-powerpoint.presentation.macroEnabled.12\", // pptm\n  \"application/vnd.openxmlformats-officedocument.presentationml.presentation\", // pptx\n  \"application/vnd.ms-powerpoint\",               // pot\n  \"application/vnd.ms-powerpoint.template.macroEnabled.12\", // potm\n  \"application/vnd.openxmlformats-officedocument.presentationml.template\", // potx\n  \"application/rtf\",                             // rtf\n  \"application/vnd.stardivision.draw\",           // sda\n  \"application/vnd.stardivision.impress\",        // sdd\n  \"application/sdp\",                             // sdp\n  \"application/vnd.stardivision.writer\",         // sdw, sgl\n  \"application/vnd.sun.xml.impress.template\",    // sti\n  \"application/vnd.sun.xml.impress\",             // sxi\n  \"application/vnd.sun.xml.writer\",              // sxw\n  \"application/vnd.sun.xml.writer.template\",     // stw\n  \"application/vnd.sun.xml.writer.global\",       // sxg\n  \"text/plain\",                                  // txt\n  \"application/x-uof\",                           // uof\n  \"application/x-uop\",                           // uop\n  \"application/x-uot\",                           // uot\n  \"application/vnd.stardivision.writer\",         // vor\n  \"application/vnd.wordperfect\",                 // wpd\n  \"application/vnd.ms-works\",                    // wps\n  \"application/xml\",                             // xml\n  \"application/epub+zip\",                        // epub\n\n  // Images\n  \"image/jpeg\",                                  // jpg, jpeg\n  \"image/png\",                                   // png\n  \"image/gif\",                                   // gif\n  \"image/bmp\",                                   // bmp\n  \"image/svg+xml\",                               // svg\n  \"image/tiff\",                                  // tiff\n  \"image/webp\",                                  // webp\n\n  // Audio / Video\n  \"audio/mpeg\",                                  // mp3, mpga\n  \"video/mp4\",                                   // mp4\n  \"video/mpeg\",                                  // mpeg\n  \"audio/mp4\",                                   // m4a\n  \"audio/wav\",                                   // wav\n  \"video/webm\",                                  // webm\n  \"audio/webm\"                                   // webm (audio)\n].includes($json.mimeType) }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Other doc types"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "656e77d3-0b79-4f95-a950-93f24506f8ce",
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "text/csv",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CSV"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "84f9cf5d-6348-43fc-b5cd-2833b4c9dd5f",
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Excel"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "0ceeb2c2-9931-479c-b105-36f9ef0381b1",
+                    "leftValue": "={{ $json.mimeType }}",
+                    "rightValue": "application/vnd.google-apps.spreadsheet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Google Sheets"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3392,
+        1376
+      ],
+      "id": "845b2b2f-4b9d-4c9b-b027-6e473c5e6222",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "65a2b6a1-2817-4d30-a0a3-ba1baeffe286",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "8ce1313f-d7ec-4336-88e7-1b861379733d",
+              "name": "data_type",
+              "value": "={{ $json.data_type }}",
+              "type": "string"
+            },
+            {
+              "id": "d1c52fad-f1af-46de-aa21-387bcb350309",
+              "name": "array_keys",
+              "value": "={{ $json.array_keys || null }}",
+              "type": "string"
+            },
+            {
+              "id": "68e7090d-0fba-4d63-a3d7-d3a10b17905c",
+              "name": "data_rows",
+              "value": "={{ $json.data_rows || null }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        8192,
+        2352
+      ],
+      "id": "7e756bad-a56f-4342-b15a-73d0c8c43093",
+      "name": "Set Text (Merged)"
+    },
+    {
+      "parameters": {
+        "content": "# Tabular Data",
+        "height": 464,
+        "width": 1776,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5200,
+        3872
+      ],
+      "id": "cb0a34c0-3c3b-42bc-b437-685aa7012703",
+      "name": "Sticky Note23"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "tabular_document_rows",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "record_manager_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Set up Record ID').item.json.record_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5312,
+        4016
+      ],
+      "id": "2647bec0-cc52-45a0-b6db-8234fa9c221d",
+      "name": "Delete Old Data Rows",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "public",
+          "mode": "list",
+          "cachedResultName": "public"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tabular_document_rows",
+          "mode": "list",
+          "cachedResultName": "tabular_document_rows"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_data": "={{ $json.toJsonString().replaceAll(/'/g, \"''\") }}",
+            "record_manager_id": "={{ $('Set up Record ID').item.json.record_id }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": [
+            {
+              "id": "id",
+              "displayName": "id",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "created_at",
+              "displayName": "created_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "dateTime",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "record_manager_id",
+              "displayName": "record_manager_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_data",
+              "displayName": "row_data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "object",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        6032,
+        4016
+      ],
+      "id": "3ed13aa0-fd20-471d-a6c9-ead8030b1dc8",
+      "name": "Insert rows in a table",
+      "retryOnFail": true,
+      "credentials": {
+        "postgres": {
+          "id": "tRlTzpjOmrCVSNLF",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "=data_rows",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        5792,
+        4016
+      ],
+      "id": "d15ca633-eefa-427a-9b4b-8a0fa9fb0eae",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c9e3737c-f583-4bc3-8d89-31deb8a4a167",
+                    "leftValue": "={{ $('Set Text (Merged)').item.json.data_type }}",
+                    "rightValue": "tabular",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Tabular data"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Set Text (Merged)').item.json.data_type }}",
+                    "rightValue": "unstructured",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b013e0cd-4c9f-4123-84cf-91f87b92dc76"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Unstructured data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3648,
+        4656
+      ],
+      "id": "a274b561-d77e-4b93-bec3-8780f4a55f4a",
+      "name": "Check data type"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8feea590-03e5-4da9-acf1-071537ee5b92",
+              "name": "data_rows",
+              "value": "={{ $('Set Text (Merged)').item.json.data_rows }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5552,
+        4016
+      ],
+      "id": "e0c4d1ea-4b69-46fe-8fa2-3f91c1ad29a7",
+      "name": "data_rows"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "xYznj1HOqGxHjDN9",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/xYznj1HOqGxHjDN9",
+          "cachedResultName": "Multimodal RAG - TheAIAutomators - SOTA RAG Sub-workflow - v1.2 Blueprint"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "binary_file": "={{ $json.data_base64 }}"
+          },
+          "matchingColumns": [
+            "binary_file"
+          ],
+          "schema": [
+            {
+              "id": "binary_file",
+              "displayName": "binary_file",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        5792,
+        1200
+      ],
+      "id": "37791052-c775-4b25-afab-1fcf17646d5e",
+      "name": "Execute Workflow",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "A6uZWZp8UkcxmaZp",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/A6uZWZp8UkcxmaZp",
+          "cachedResultName": "Knowledge Graph - TheAIAutomators - SOTA RAG Sub-workflow - v1.1 Blueprint"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "record_manager_item_json": "={{ $('Search Record Manager').item.json }}",
+            "record_manager_item_json_hash": "={{ $('Search Record Manager').item.json.hash }}",
+            "new_hash": "={{ $('Generate Hash').item.json.hash }}",
+            "text": "={{ JSON.stringify($json.text) }}",
+            "doc_id": "={{ $('Set Data').first().json.doc_id }}",
+            "supabase_row_id": "={{ $('Create Row in Record Manager').isExecuted ? $('Create Row in Record Manager').item.json.id : $('Search Record Manager').item.json.id }}",
+            "graph_id": "={{ $('Search Record Manager').item.json.graph_id}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "record_manager_item_json",
+              "displayName": "record_manager_item_json",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "object"
+            },
+            {
+              "id": "record_manager_item_json_hash",
+              "displayName": "record_manager_item_json_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "new_hash",
+              "displayName": "new_hash",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "doc_id",
+              "displayName": "doc_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "supabase_row_id",
+              "displayName": "supabase_row_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number"
+            },
+            {
+              "id": "graph_id",
+              "displayName": "graph_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        4352,
+        4048
+      ],
+      "id": "9bedc9f9-8b4f-4d7f-9ef3-6d3e993a30d4",
+      "name": "Execute Knowledge Graph Updates",
+      "alwaysOutputData": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "15ce0e44-3fcb-4b60-83b6-8e6e721ff266",
+              "leftValue": "={{ $('Set Data').first().json.contextual_embedding_enabled }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        6656,
+        4944
+      ],
+      "id": "9a1619fc-64f8-47c8-9326-e5405988102e",
+      "name": "Contextual embedding enabled?"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "63096a5f-5247-474b-95b4-cbeadca1f982",
+              "name": "content",
+              "value": "={{ $json.text }} - {{ $('Loop over Chunks').all()[$itemIndex].json.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        7568,
+        4800
+      ],
+      "id": "7a2180b2-1e57-4cf8-ab3c-df7a08ff219a",
+      "name": "Chunk with contextual embedding"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c9e3737c-f583-4bc3-8d89-31deb8a4a167",
+                    "leftValue": "={{ $('Set Text (Merged)').first().json.data_type }}",
+                    "rightValue": "tabular",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Tabular data"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Set Text (Merged)').first().json.data_type }}",
+                    "rightValue": "unstructured",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b013e0cd-4c9f-4123-84cf-91f87b92dc76"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Unstructured data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3776,
+        4032
+      ],
+      "id": "2e3cd071-23bf-4a1e-aa42-a0a7b8a486d6",
+      "name": "Check data type1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.llamaindex.ai/api/parsing/job/{{ $('Upload file to LlamaParse').item.json.id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "da07af8b-120e-484b-8d9c-f29e31ce430d",
+      "name": "Get Processing Status",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        6384,
+        2304
+      ],
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "300fce8c-b19a-4d0c-86e8-f62853c70ce2",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "SUCCESS"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "SUCCESS"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "e6058aa0-a3e2-4ce3-9bed-6ff41a5be052",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "ERROR"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "ERROR"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "ceb6338f-4261-40ac-be11-91f61c7302ba",
+                    "operator": {
+                      "type": "number",
+                      "operation": "gt"
+                    },
+                    "leftValue": "={{ $json.retry_counter }}",
+                    "rightValue": "={{ $('Set Data').item.json.llamaparse_max_polling_attempts }}"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "EXCEEDED_RETRIES"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "ceb6338f-4261-40ac-be11-91f61c7302ba",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "CANCELED"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "CANCELED"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "0fa97d86-432a-409a-917e-5f1a002b1ab9",
+                    "operator": {
+                      "name": "filter.operator.equals",
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "PENDING"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "PENDING"
+            }
+          ]
+        },
+        "options": {
+          "allMatchingOutputs": false
+        }
+      },
+      "id": "b3a93327-d403-4f91-8043-f6a749e74817",
+      "name": "Is Job Ready?",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        5904,
+        2064
+      ],
+      "typeVersion": 3,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloud.llamaindex.ai/api/parsing/upload",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "=data"
+            },
+            {
+              "name": "model",
+              "value": "openai-gpt-4-1-mini"
+            },
+            {
+              "name": "high_res_ocr",
+              "value": "true"
+            },
+            {
+              "name": "adaptive_long_table",
+              "value": "true"
+            },
+            {
+              "name": "outlined_table_extraction",
+              "value": "true"
+            },
+            {
+              "name": "output_tables_as_HTML",
+              "value": "false"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cd1142a1-45f7-45e4-aef8-3a5441e25d75",
+      "name": "Upload file to LlamaParse",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        4736,
+        1984
+      ],
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lSFkzmpI1ZAMZqHr",
+          "name": "Header Auth account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://api.cloud.llamaindex.ai/api/parsing/job/{{ $json.id }}/result/markdown",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "877733e1-99ce-4277-acf6-05fd460fda90",
+      "name": "Get parsed document",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        6128,
+        1936
+      ],
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 3
+      },
+      "id": "c8b83138-0d38-4b18-91a7-b30c75cf0fea",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        6128,
+        2256
+      ],
+      "webhookId": "36c73a09-89bd-4a27-aba0-084aa7d2a987",
+      "typeVersion": 1.1,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "amount": 7
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5184,
+        2032
+      ],
+      "id": "7b6eafff-b8fb-4157-9b3c-b793cf5e0c54",
+      "name": "Wait1",
+      "webhookId": "a8f5059d-c449-4319-841b-f3da2bb3eb13",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b53d0b18-0e5e-4b24-915d-933cd7a241b5",
+              "name": "retry_counter",
+              "value": "={{ $('Is Job Ready?').item.json.retry_counter + 1}}",
+              "type": "number"
+            },
+            {
+              "id": "48d8fa5f-8935-4c27-8b72-05af922886c9",
+              "name": "status",
+              "value": "={{ $json.status }}",
+              "type": "string"
+            },
+            {
+              "id": "e8c53db0-a41b-44cc-a0ef-9effcb4b94f8",
+              "name": "id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5504,
+        2256
+      ],
+      "id": "dbe5fa5a-2a4f-46dd-86fc-49488530b542",
+      "name": "Counter",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3533c696-8cb4-4be8-967a-555f88dbca3c",
+              "name": "retry_counter",
+              "value": 0,
+              "type": "number"
+            },
+            {
+              "id": "0c517b55-97fb-4d4b-835b-930cf72c4738",
+              "name": "status",
+              "value": "={{ $('Upload file to LlamaParse').item.json.status }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5424,
+        2048
+      ],
+      "id": "00d74c16-5262-4e17-a715-5a7507b5b39e",
+      "name": "Set counter",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c9e3737c-f583-4bc3-8d89-31deb8a4a167",
+                    "leftValue": "={{ $('Set Data').item.json.send_tabular_data_to_vector_store }}",
+                    "rightValue": "tabular",
+                    "operator": {
+                      "type": "boolean",
+                      "operation": "true",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Yes"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        6672,
+        4144
+      ],
+      "id": "b9de6044-410e-4927-a0de-c14f9682f2b6",
+      "name": "Send tabular data to vector store?"
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        6336,
+        4016
+      ],
+      "id": "ae43b04d-747e-4617-80a3-67f64c45fee9",
+      "name": "Aggregate4"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/embeddings",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"text-embedding-3-small\",\n  \"input\": {{ JSON.stringify($json.contents) }}\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        8144,
+        4960
+      ],
+      "id": "5c13a48d-f09d-4026-a00b-c94abcb53330",
+      "name": "Create OpenAI Embeddings",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 2500,
+      "credentials": {
+        "openAiApi": {
+          "id": "r6dwaEmQxKEvrskM",
+          "name": "OpenAi account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Aggregate all chunk strings into one array and attach to the first item only\nconst items = $input.all();\n\n// Build contents from items that look like { json: { chunk: \"...\" } }\nconst contents = items\n  .map(it => it.json?.content)\n  .filter(s => typeof s === 'string' && s.trim() !== '');\n\n// Use the first item as the carrier\nconst first = items[0] ?? { json: {} };\nfirst.json.contents = contents;\n\nreturn [first];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        7872,
+        4992
+      ],
+      "id": "0445c5cb-d61f-4bc9-99fc-56daad231096",
+      "name": "Setup Chunk for Embedding1"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "// Input: OpenAI response with multiple embeddings\n// Uses unnest-based batch INSERT for much better performance\n// Instead of N*4 parameters, we pass 4 arrays and let PostgreSQL unnest them\nconst embeddings = $input.first().json.data;\nconst originalContents = $('Setup Chunk for Embedding1').first().json.contents;\nconst loopItems = $('Loop over Chunks').all();\n\nconst recordManagerId = $('Create Row in Record Manager').isExecuted\n  ? $('Create Row in Record Manager').first().json.id\n  : $('Search Record Manager').first().json.id;\n\n// Build parallel arrays for unnest\nconst contents = [];\nconst metadatas = [];\nconst embeddingStrs = [];\nconst recordManagerIds = [];\n\nfor (const embeddingObj of embeddings) {\n  const idx = embeddingObj.index;\n  contents.push(originalContents[idx]);\n  metadatas.push(JSON.stringify(loopItems[idx].json.metadata));\n  embeddingStrs.push(`[${embeddingObj.embedding.join(',')}]`);\n  recordManagerIds.push(recordManagerId);\n}\n\n// unnest-based INSERT: only 4 parameters regardless of batch size\nconst insertQuery = `\n  INSERT INTO documents_v2 (content, metadata, embedding, record_manager_id)\n  SELECT c, m::jsonb, e::vector, r\n  FROM unnest($1::text[], $2::text[], $3::text[], $4::int[])\n    AS t(c, m, e, r)\n`;\n\nconst parameters = [contents, metadatas, embeddingStrs, recordManagerIds];\n\nreturn [{\n  insertQuery: insertQuery,\n  parameters: parameters,\n  recordCount: contents.length,\n  batchInfo: `Processed ${contents.length} embeddings via unnest batch`\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        8400,
+        4960
+      ],
+      "id": "ee6237d6-fa52-47c7-8790-6bafdd45e323",
+      "name": "Setup Chunk for Batch Insertion"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "{{ $json.insertQuery }}",
+        "options": {
+          "queryReplacement": "={{ $json.parameters }}"
+        }
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        8688,
+        5024
+      ],
+      "id": "ac013fce-6d98-4329-af2c-48f14748546e",
+      "name": "Insert into Vector Store",
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 2500,
+      "credentials": {
+        "postgres": {
+          "id": "tRlTzpjOmrCVSNLF",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "48e8abfe-dbee-4273-a7ba-bde4efb0df28",
+              "leftValue": "={{ $('Set Data').item.json.ocr_enabled }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4880,
+        1392
+      ],
+      "id": "9cbcf091-d29d-41fe-96f4-bd9b937decf9",
+      "name": "Is OCR enabled?"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "40cb0058-f77e-4cb8-9cd5-7774c1c72544",
+              "leftValue": "={{ $json.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        9600,
+        3472
+      ],
+      "id": "926af3be-b63c-49da-9905-f4a64c3207bd",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function to clean Unicode escape sequences\nfunction cleanUnicodeText(text) {\n  if (typeof text !== 'string') return text;\n  \n  return text\n    // Remove control characters like \\u0002, \\u0000, etc.\n    .replace(/[\\u0000-\\u001F\\u007F-\\u009F]/g, '')\n    // Clean up extra whitespace\n    .replace(/\\s+/g, ' ')\n    .trim();\n}\n\n// Loop over input items and clean the content field\nfor (const item of $input.all()) {\n  // Clean the content field if it exists\n  if (item.json.content) {\n    item.json.content = cleanUnicodeText(item.json.content);\n  }\n  \n  // Optional: Clean all string fields in the item\n  Object.keys(item.json).forEach(key => {\n    if (typeof item.json[key] === 'string') {\n      item.json[key] = cleanUnicodeText(item.json[key]);\n    }\n  });\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6080,
+        1584
+      ],
+      "id": "6a66e20e-bd01-4d6a-85b3-c5641a024197",
+      "name": "Sanitize Text"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.mistral.ai/v1/files/{{ $json.id }}/url",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mistralCloudApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "expiry",
+              "value": "24"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        5792,
+        1392
+      ],
+      "id": "75fd50ef-826d-4cf0-9fca-451be8b8535e",
+      "name": "Get File URL",
+      "retryOnFail": true,
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "Z91uOlo3ymd8UaZz",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.mistral.ai/v1/ocr",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "mistralCloudApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"mistral-ocr-latest\",\n  \"document\": {\n    \"type\": \"document_url\",\n    \"document_url\": \"{{ $json.url }}\"\n  },\n  \"include_image_base64\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        6016,
+        1392
+      ],
+      "id": "7b2b3749-f689-4e3b-8292-d692d5a8fd38",
+      "name": "Get OCR",
+      "retryOnFail": true,
+      "credentials": {
+        "mistralCloudApi": {
+          "id": "Z91uOlo3ymd8UaZz",
+          "name": "Mistral Cloud account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        5552,
+        1584
+      ],
+      "id": "6021b4aa-d9bb-4da5-83b8-224e01e07cdf",
+      "name": "Extract Text"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "destinationKey": "data_base64",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        5504,
+        1200
+      ],
+      "id": "80c0c4eb-348b-4095-bea4-2a8d336c4ac4",
+      "name": "Base64 File",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Loop Start\nOnly Supports Processing 1 File at a time. For parallel imports check out our \"RAG at Scale\" System",
+        "height": 288,
+        "width": 256,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        960,
+        1248
+      ],
+      "id": "121bb685-3c2a-482a-aed7-3f24b9c7bfca",
+      "name": "Sticky Note31"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a4697977-31b6-4740-ae7c-0e3a35ecfdf0",
+              "leftValue": "={{ $json }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        4384,
+        4880
+      ],
+      "id": "03146ebe-9ccc-4833-b1f7-8b4d012e2e05",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2cb5d7fc-ea46-460e-bb1e-21756214930a",
+              "name": "record_id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3424,
+        4848
+      ],
+      "id": "98bf5ee6-c303-4ec0-ad86-7d0b5245a435",
+      "name": "Set up Record ID"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        9968,
+        4432
+      ],
+      "id": "5d1bb6bc-a9f5-44fe-9689-5ab5535b47f4",
+      "name": "Continue"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3a9c47ef-1799-4cf6-9411-51c4789e2adb",
+              "name": "markdown",
+              "value": "={{ $json.body.data[0].markdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        5232,
+        592
+      ],
+      "id": "88321342-212c-4673-ad01-afce27baca12",
+      "name": "Webpage Markdown",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "4f60ed7e-4284-4360-bca2-4513859e7dde",
+              "leftValue": "={{ $('Webhook').isExecuted }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1680,
+        1472
+      ],
+      "id": "418cd4ce-b9e3-4f4d-8ad8-07863a2bfaf2",
+      "name": "File Check"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "destinationKey": "content",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        5392,
+        720
+      ],
+      "id": "6af736a6-fa1d-4b2b-a79f-d293a29c0548",
+      "name": "Extract from text file",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## TODO: Add Webhook\nFrom the Webhook node below",
+        "height": 280,
+        "width": 264
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        368,
+        -144
+      ],
+      "id": "8d848024-c17a-4595-95db-e96a1d298e49",
+      "name": "Sticky Note6",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Loop Over Items').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2432,
+        1600
+      ],
+      "id": "a63bdd81-18f4-46e8-8f2e-76261c740793",
+      "name": "Main File Download",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VDLj39UaaNWpXOn5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.content }}",
+        "destinationKey": "content",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        5856,
+        1776
+      ],
+      "id": "f63877a6-04e1-4f74-b83f-2d4866ee6590",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Set Data').first().json.doc_id }}"
+        },
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1Z5Fi6wF_I6xHYjLCA_kY-xdkKdXFCAaS",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1376,
+        2048
+      ],
+      "id": "00d9c4f7-621d-4911-ae26-c0718fa93e73",
+      "name": "Move to Error Folder",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VDLj39UaaNWpXOn5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        8192,
+        2112
+      ],
+      "id": "8986e614-42b9-46e0-860f-51e06d954b11",
+      "name": "Error Track"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        9600,
+        3264
+      ],
+      "id": "9fc7cf6e-a833-497f-94ce-aea53ca14337",
+      "name": "Error"
+    },
+    {
+      "parameters": {
+        "amount": 0.2
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        6928,
+        4816
+      ],
+      "id": "1ff47df9-55a1-4672-a8d3-83aba7c2cf08",
+      "name": "Wait2",
+      "webhookId": "83d6b920-6b4b-481a-b405-5e833520194d",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Rate Limiting\nIf you run in to Rate Limiting issues with contextual vector embeddings, you can increase this wait node",
+        "height": 288,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6864,
+        4656
+      ],
+      "id": "4256a147-b2b2-4bb9-acbc-72acbb326463",
+      "name": "Sticky Note34"
+    },
+    {
+      "parameters": {
+        "content": "# RAG File Creation & Update\nActivate the workflow and then upload files to the Google Drive folder\n\nNote: Google drive Triggers do not fire when you move files in between folders",
+        "height": 228,
+        "width": 424,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1392
+      ],
+      "id": "58a23a43-9749-44e1-b0fa-d8e73deb398b",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Webscraping Creation & Update",
+        "height": 180,
+        "width": 424,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1104
+      ],
+      "id": "c53c53d7-7bd9-4f8f-b2af-38ab1d209029",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## TODO\n### Enable/Disable Services Here",
+        "height": 280,
+        "width": 280
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1296,
+        1376
+      ],
+      "id": "0be3ffed-0e09-4870-9101-7223545129ee",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## TODO\nMultimodal RAG sub-workflow must be configured if Multimodal is enabled in the \"Set Data\" node.",
+        "height": 292,
+        "width": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5712,
+        1072
+      ],
+      "id": "b4867a0d-b989-47c6-928e-5d064df75308",
+      "name": "Sticky Note25"
+    },
+    {
+      "parameters": {
+        "content": "## TODO\nGraphRAG sub-workflow must be configured if LightRAG is enabled in the \"Set Data\" node.",
+        "height": 308,
+        "width": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4272,
+        3920
+      ],
+      "id": "0f290d38-0b4d-41ed-8437-6417e29319d3",
+      "name": "Sticky Note26",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        3840,
+        4400
+      ],
+      "id": "1dc1dddb-894f-4b9c-a27e-242485383714",
+      "name": "Next"
+    },
+    {
+      "parameters": {
+        "content": "# Record Manager Router\n\n### 0. No Change to Doc\nMove to next file\n\n### 1. New Document\nAdd to Record Manager and Vector Store \n\n### 2. Changed Document \nDelete old vectors and add new ones",
+        "height": 820,
+        "width": 2668,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        4544
+      ],
+      "id": "8e06e9a9-b7ea-41f0-b81e-e7c276116c42",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "# Document & Metadata Enrichment",
+        "height": 820,
+        "width": 1184,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4160,
+        4544
+      ],
+      "id": "e2d09fca-df58-42d7-9e8b-0b83a38c4be2",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "# Smart Markdown Chunking & Hierarchy Extractor",
+        "height": 820,
+        "width": 1188,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        5424,
+        4528
+      ],
+      "id": "e8cb4b25-b04f-4e1f-be26-f94a2685a441",
+      "name": "Sticky Note17"
+    },
+    {
+      "parameters": {
+        "content": "## Rate Limiting - Batch Size\nIf you run in to Rate Limiting issues with contextual vector embeddings, you will need to reduce this",
+        "height": 336,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6272,
+        4848
+      ],
+      "id": "db303cc6-61e1-4d17-9666-55ef8b23e00d",
+      "name": "Sticky Note33"
+    },
+    {
+      "parameters": {
+        "content": "# Contextual Vector Embeddings",
+        "height": 820,
+        "width": 1204,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        6656,
+        5248
+      ],
+      "id": "9653cc04-435e-4cda-8871-b27e5792139c",
+      "name": "Sticky Note15"
+    },
+    {
+      "parameters": {
+        "content": "# Insert to Supabase Vector Store",
+        "height": 820,
+        "width": 1220,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        7792,
+        4544
+      ],
+      "id": "6ee94c89-4522-47ca-a684-fe88ab2e8232",
+      "name": "Sticky Note16"
+    },
+    {
+      "parameters": {
+        "content": "## TODO\nOptionally Change Embedding Model ",
+        "height": 320,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        8064,
+        4832
+      ],
+      "id": "953e75a6-08c3-4908-a268-a338e58d785b",
+      "name": "Sticky Note28"
+    },
+    {
+      "parameters": {
+        "content": "# Trigger Webscraping",
+        "height": 180,
+        "width": 424,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -160
+      ],
+      "id": "07df92aa-ef21-4ae3-b3b2-95427e112939",
+      "name": "Sticky Note5",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Page-Aware Markdown Aggregation for n8n Code Node\n// Use a unique delimiter that won't appear in documents\nconst PAGE_MARKER_START = '<<<PAGE_START:';\nconst PAGE_MARKER_END = '>>>';\n\n// Get the first item to process\nconst firstItem = $input.first();\n\n// Check if pages exist in the first item\nif (firstItem.json.pages && Array.isArray(firstItem.json.pages)) {\n  // Aggregate pages with page markers\n  const aggregatedMarkdown = firstItem.json.pages.map((page, index) => {\n    const pageNumber = page.index !== undefined ? page.index : index;\n    const pageMarker = `${PAGE_MARKER_START}${pageNumber}${PAGE_MARKER_END}`;\n    \n    // Insert page marker at the beginning of each page's content\n    return `${pageMarker}\\n\\n${page.markdown}`;\n  }).join('\\n\\n');\n  \n  // Return only the first item with aggregated markdown\n  return [{\n    json: {\n      content: aggregatedMarkdown\n    }\n  }];\n} else {\n  // Handle case where pages don't exist or aren't an array\n  return [{\n    json: {\n      content: firstItem.json.content || ''\n    }\n  }];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6416,
+        1424
+      ],
+      "id": "8893d5be-a023-4bdd-893d-f465db58e33c",
+      "name": "Aggregate Markdown with Page Numbers"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Smart Markdown Chunker for n8n Code Node (Integrated with Hierarchy Extractor + Merger)\n// Configuration - adjust these values as needed\nconst MIN_CHUNK_SIZE = 400;\nconst TARGET_CHUNK_SIZE = 600;\nconst MAX_CHUNK_SIZE = 800; // Note: Chunks can go over this size to both avoid tiny chunks as well as account for the contextual snippet and if there is more then one heading per chunk\nconst MAX_HEADING_LENGTH = 200   // For heading truncation in split chunks\n\n// Page marker configuration\nconst PAGE_MARKER_START = '<<<PAGE_START:';\nconst PAGE_MARKER_END = '>>>';\n\n// Mappings\nconst MARKDOWN_FIELD = 'content'  // Field name, not the actual content\nconst DOCUMENT_ID_FIELD = $('Set Data').first().json.doc_id\nconst DOCUMENT_NAME = $('Set Data').first().json.doc_name\nconst DOCUMENT_SUMMARY = $input.first().json.custom_metadata.document_summary\nconst DOCUMENT_HEADLINE = \"This chunk is from \" + $input.first().json.custom_metadata.document_headline_description + \", specifically \"\nconst DEV_MODE = false; // Enable to include debug fields for testing\n\n// Classes\nclass HierarchyNode {\n  constructor(title, level) {\n    this.title = title;\n    this.level = level;\n  }\n}\n\nclass MarkdownChunk {\n  constructor(data) {\n    this.title = data.title;\n    this.level = data.level;\n    this.cascading_path = data.cascading_path;\n    this.content = data.content;\n    this.hierarchy_stack = data.hierarchy_stack;\n    this.original_level = data.original_level;\n    this.is_merged = data.is_merged || false;\n    this.is_split = data.is_split || false;\n    this.split_part_index = data.split_part_index || null;\n    this.total_split_parts = data.total_split_parts || null;\n    this.original_chunk_title = data.original_chunk_title || null;\n    this.original_cascading_path = data.original_cascading_path || null;\n    this.merged_type = data.merged_type || null;\n    this.original_chunks = data.original_chunks || null;\n    this.merged_chunk_count = data.merged_chunk_count || 1;\n    this.enhanced_content_raw = data.enhanced_content_raw || null;\n  }\n}\n\nclass SmartMarkdownChunker {\n  constructor(minChunkSize, maxChunkSize, targetChunkSize, devMode = false) {\n    this.MIN_CHUNK_SIZE = minChunkSize;\n    this.MAX_CHUNK_SIZE = maxChunkSize;\n    this.TARGET_CHUNK_SIZE = targetChunkSize;\n    this.DEV_MODE = devMode;\n    this._document_summary = 'No summary available';\n    this._total_chunks = 0;\n    this._parsed_sections = []; // Store parsed sections for hierarchy building\n\n    // Markdown-aware separators (from LangChain approach)\n    this.MARKDOWN_SEPARATORS = [\n      \"\\n## \", \"\\n### \", \"\\n#### \", \"\\n##### \", \"\\n###### \",\n      \"```\\n\\n\", \"\\n\\n***\\n\\n\", \"\\n\\n---\\n\\n\", \"\\n\\n___\\n\\n\",\n      \"\\n\\n\", \"\\n\", \". \", \" \", \"\"\n    ];\n  }\n\n  // STEP 1: Parse markdown by major headings (H1, H2, H3, H4, H5, H6)\n  parseMarkdownSections(markdown, headingLevels = [1, 2, 3, 4, 5, 6]) {\n    const lines = markdown.split('\\n');\n    const sections = [];\n    let currentSection = null;\n    let currentContent = [];\n    const hierarchyStack = [];\n\n    for (let i = 0; i < lines.length; i++) {\n      const line = lines[i];\n      const headingMatch = line.match(/^(#+)\\s*(.*)$/);\n\n      if (headingMatch) {\n        const level = headingMatch[1].length;\n\n        // Only split on specified heading levels\n        if (headingLevels.includes(level)) {\n          // Save previous section if it exists\n          if (currentSection && currentContent.length > 0) {\n            currentSection.content = currentContent.join('\\n');\n            sections.push(currentSection);\n          }\n\n          const originalTitle = headingMatch[2].trim();\n          let displayTitle = originalTitle;\n\n          // Truncate extremely long headings for display\n          if (displayTitle.length > MAX_HEADING_LENGTH) {\n            displayTitle = displayTitle.substring(0, MAX_HEADING_LENGTH - 3) + '...';\n          }\n\n          // Update hierarchy stack\n          while (hierarchyStack.length >= level) {\n            hierarchyStack.pop();\n          }\n          hierarchyStack.push(new HierarchyNode(displayTitle, level));\n\n          currentSection = {\n            title: displayTitle,\n            level,\n            hierarchy_stack: JSON.parse(JSON.stringify(hierarchyStack)),\n            content: '',\n            original_title: originalTitle\n          };\n\n          currentContent = [line];\n        } else {\n          // Include sub-headings in content\n          currentContent.push(line);\n        }\n      } else {\n        currentContent.push(line);\n      }\n    }\n\n    // Don't forget the last section\n    if (currentSection && currentContent.length > 0) {\n      currentSection.content = currentContent.join('\\n');\n      sections.push(currentSection);\n    }\n\n    // If no major headings found, treat entire document as one section\n    if (sections.length === 0) {\n      sections.push({\n        title: 'Document',\n        level: 1,\n        hierarchy_stack: [new HierarchyNode('Document', 1)],\n        content: markdown,\n        original_title: 'Document'\n      });\n    }\n\n    return sections;\n  }\n\n  // STEP 2: Recursive markdown-aware splitting within sections\n  recursiveMarkdownSplit(text, separators = null) {\n    if (!separators) separators = this.MARKDOWN_SEPARATORS;\n    if (text.length <= this.MAX_CHUNK_SIZE) return [text];\n\n    for (const separator of separators) {\n      if (separator === \"\") {\n        // Character-by-character splitting as last resort\n        const chunks = [];\n        for (let i = 0; i < text.length; i += this.MAX_CHUNK_SIZE) {\n          chunks.push(text.slice(i, i + this.MAX_CHUNK_SIZE));\n        }\n        return chunks;\n      }\n\n      if (text.includes(separator)) {\n        const parts = text.split(separator);\n        const chunks = [];\n        let currentChunk = '';\n\n        for (let i = 0; i < parts.length; i++) {\n          const part = i === 0 ? parts[i] : separator + parts[i];\n\n          if (currentChunk.length + part.length <= this.MAX_CHUNK_SIZE) {\n            currentChunk += part;\n          } else {\n            if (currentChunk) chunks.push(currentChunk);\n\n            // If this part is still too large, recursively split it\n            if (part.length > this.MAX_CHUNK_SIZE) {\n              chunks.push(...this.recursiveMarkdownSplit(part, separators.slice(1)));\n            } else {\n              currentChunk = part;\n            }\n          }\n        }\n\n        if (currentChunk) chunks.push(currentChunk);\n        return chunks.filter(chunk => chunk.trim().length > 0);\n      }\n    }\n\n    return [text];\n  }\n\n  splitSectionIntoChunks(section) {\n    const chunks = this.recursiveMarkdownSplit(section.content);\n\n    return chunks.map((chunkContent, index) => {\n      let finalContent = chunkContent.trim();\n\n      // For split chunks, add the original section heading with part number\n      if (chunks.length > 1) {\n        const headingPrefix = '#'.repeat(section.level);\n\n        if (index === 0) {\n          // For Part 1, keep original text lossless - just add (Part 1) to existing heading\n          const originalHeading = `${headingPrefix} ${section.original_title} (Part ${index + 1})`;\n          const lines = finalContent.split('\\n');\n          const firstLineHeadingMatch = lines[0].match(/^#+\\s/);\n          if (firstLineHeadingMatch) {\n            lines[0] = originalHeading;\n            finalContent = lines.join('\\n');\n          } else {\n            finalContent = `${originalHeading}\\n\\n${finalContent}`;\n          }\n        } else {\n          // For Part 2+, add the heading at the start (trimmed for length)\n          let titleForHeading = section.original_title;\n          const partSuffix = ` (Part ${index + 1})`;\n          const maxTitleLength = MAX_HEADING_LENGTH - headingPrefix.length - partSuffix.length - 1; // -1 for space\n\n          if (titleForHeading.length > maxTitleLength) {\n            titleForHeading = titleForHeading.substring(0, maxTitleLength - 3) + '...';\n          }\n\n          const originalHeading = `${headingPrefix} ${titleForHeading}${partSuffix}`;\n          finalContent = `${originalHeading}\\n\\n${finalContent}`;\n        }\n      }\n\n      return {\n        content: finalContent,\n        section_title: section.title,\n        section_level: section.level,\n        hierarchy_stack: section.hierarchy_stack,\n        original_section_title: section.original_title,\n        chunk_index_in_section: index,\n        total_chunks_in_section: chunks.length,\n        is_split: chunks.length > 1,\n        split_part_number: chunks.length > 1 ? index + 1 : null,\n        size: finalContent.length\n      };\n    });\n  }\n\n  // STEP 3: Merge small chunks intelligently\n  mergeSmallChunks(chunks) {\n    const result = [];\n    let i = 0;\n\n    while (i < chunks.length) {\n      const currentChunk = chunks[i];\n\n      if (currentChunk.size >= this.MIN_CHUNK_SIZE) {\n        result.push(currentChunk);\n        i++;\n        continue;\n      }\n\n      // Try to merge with next chunk(s)\n      let mergedContent = currentChunk.content;\n      let mergedSize = currentChunk.size;\n      let chunksToMerge = [currentChunk];\n      let j = i + 1;\n\n      while (j < chunks.length && mergedSize < this.MIN_CHUNK_SIZE) {\n        const nextChunk = chunks[j];\n        const testSize = mergedSize + nextChunk.size + 2; // +2 for \\n\\n separator\n\n        // Allow going over MAX_CHUNK_SIZE to avoid tiny chunks\n        if (testSize <= this.MAX_CHUNK_SIZE * 1.2 || mergedSize < this.MIN_CHUNK_SIZE) {\n          mergedContent += '\\n\\n' + nextChunk.content;\n          mergedSize = testSize;\n          chunksToMerge.push(nextChunk);\n          j++;\n        } else {\n          break;\n        }\n      }\n\n      // Find if any merged chunk is a split part\n      const splitChunk = chunksToMerge.find(chunk => chunk.is_split);\n\n      // Create merged chunk\n      const mergedChunk = {\n        content: mergedContent,\n        section_title: currentChunk.section_title,\n        section_level: currentChunk.section_level,\n        hierarchy_stack: currentChunk.hierarchy_stack,\n        original_section_title: currentChunk.original_section_title,\n        chunk_index_in_section: currentChunk.chunk_index_in_section,\n        total_chunks_in_section: currentChunk.total_chunks_in_section,\n        is_split: splitChunk ? splitChunk.is_split : currentChunk.is_split,\n        split_part_number: splitChunk ? splitChunk.split_part_number : currentChunk.split_part_number,\n        is_merged: chunksToMerge.length > 1,\n        merged_chunk_count: chunksToMerge.length,\n        size: mergedSize,\n        original_chunks: chunksToMerge.length > 1 ? chunksToMerge : null\n      };\n\n      result.push(mergedChunk);\n      i = j;\n    }\n\n    return result;\n  }\n\n  // STEP 4: Add document headline to final chunks\n  addDocumentHeadline(chunks, headline) {\n    if (!headline) return chunks;\n\n    return chunks.map(chunk => ({\n      ...chunk,\n      content: `${headline}${chunk.content}`,\n      size: chunk.content.length + headline.length\n    }));\n  }\n\n  // Extract page information from chunk content\n  extractPageInfo(content) {\n    const pageMarkerRegex = new RegExp(`${PAGE_MARKER_START.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}(\\\\d+)${PAGE_MARKER_END.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}`, 'g');\n    const pages = [];\n    let match;\n\n    while ((match = pageMarkerRegex.exec(content)) !== null) {\n      pages.push(parseInt(match[1]));\n    }\n\n    // Remove duplicates and sort\n    return [...new Set(pages)].sort((a, b) => a - b);\n  }\n\n  // Clean page markers from content\n  cleanPageMarkers(content) {\n    const pageMarkerRegex = new RegExp(`${PAGE_MARKER_START.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\\\d+${PAGE_MARKER_END.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')}\\\\s*\\\\n?\\\\n?`, 'g');\n    return content.replace(pageMarkerRegex, '').trim();\n  }\n\n  // Create metadata for chunks\n  createChunkMetadata(chunks) {\n    let currentPage = 0; // Start with page 0 (which is page 1 in human terms)\n\n    return chunks.map((chunk, index) => {\n      // Extract page information before cleaning\n      const pagesInChunk = this.extractPageInfo(chunk.content);\n\n      // Determine all pages this chunk spans\n      let chunkPages = [];\n\n      if (pagesInChunk.length > 0) {\n        // This chunk contains page markers - include all pages found + current page\n        const allPages = [currentPage, ...pagesInChunk];\n        chunkPages = [...new Set(allPages)].sort((a, b) => a - b);\n        // Update current page to the highest page found\n        currentPage = Math.max(...pagesInChunk);\n      } else {\n        // No page markers in this chunk - inherit current page\n        chunkPages = [currentPage];\n      }\n\n      // Clean the content of page markers\n      const cleanContent = this.cleanPageMarkers(chunk.content);\n      chunk.content = cleanContent;\n\n      const metadata = {\n        chunk_index: index,\n        content_length: cleanContent.length,\n        pages: chunkPages.map(p => p + 1) // Convert to human-readable page numbers (1, 2, 3...)\n      };\n\n      // Add section information for context\n      metadata.cascading_path = chunk.hierarchy_stack ?\n        chunk.hierarchy_stack.map(node => node.title).join(' > ') :\n        chunk.section_title;\n\n      // Add split part information if applicable\n      if (chunk.is_split && chunk.split_part_number) {\n        metadata.split_part_number = chunk.split_part_number;\n        metadata.total_chunks_in_section = chunk.total_chunks_in_section;\n      }\n\n      if (this.DEV_MODE) {\n        // Size analysis\n        metadata.meets_size_requirements = chunk.size >= this.MIN_CHUNK_SIZE && chunk.size <= this.MAX_CHUNK_SIZE;\n        metadata.size_category = chunk.size < this.MIN_CHUNK_SIZE ? 'small' :\n          chunk.size > this.MAX_CHUNK_SIZE ? 'large' : 'optimal';\n\n        // Required dev fields\n        metadata.is_merged = chunk.is_merged || false;\n        metadata.is_split = chunk.is_split || false;\n        metadata.merged_chunk_count = chunk.merged_chunk_count || 1;\n        metadata.section_level = chunk.section_level;\n        metadata.section_title = chunk.section_title;\n\n        // Split part information\n        if (chunk.is_split && chunk.split_part_number) {\n          metadata.split_part_number = chunk.split_part_number;\n        }\n\n        // Additional dev info\n        if (chunk.is_split) {\n          metadata.chunk_index_in_section = chunk.chunk_index_in_section;\n        }\n\n        if (chunk.original_chunks) {\n          metadata.original_chunks_info = chunk.original_chunks.map(c => ({\n            section_title: c.section_title,\n            size: c.size,\n            is_split: c.is_split\n          }));\n        }\n      }\n\n      return {\n        chunk: chunk.content,\n        chunk_metadata: metadata\n      };\n    });\n  }\n\n  // Main processing method - implements the 4-step approach\n  chunkText(markdownContent) {\n    try {\n      console.log('Starting 4-step markdown chunking process...');\n\n      // STEP 1: Parse markdown by major headings (H1, H2, H3, H4, H5, H6)\n      const sections = this.parseMarkdownSections(markdownContent, [1, 2, 3, 4, 5, 6]);\n      console.log(`Step 1 - Parsed into ${sections.length} major sections`);\n\n      // Store parsed sections for later hierarchy building\n      this._parsed_sections = sections.map((section, index) => ({\n        sectionIndex: index,\n        title: section.title,\n        originalTitle: section.original_title,\n        level: section.level,\n        hierarchyStack: section.hierarchy_stack,\n        hierarchyPath: section.hierarchy_stack.map(node => node.title).join(' > '),\n        contentLength: section.content.length\n      }));\n\n      // STEP 2: Recursive markdown-aware splitting within sections\n      let allChunks = [];\n      for (const section of sections) {\n        const sectionChunks = this.splitSectionIntoChunks(section);\n        allChunks.push(...sectionChunks);\n      }\n      console.log(`Step 2 - Split into ${allChunks.length} chunks`);\n\n      // STEP 3: Merge small chunks intelligently\n      const mergedChunks = this.mergeSmallChunks(allChunks);\n      console.log(`Step 3 - After merging: ${mergedChunks.length} chunks`);\n\n      // STEP 4: Add document headline (only if contextual_embedding_enabled is false)\n      const contextualEmbeddingEnabled = $('Set Data').first().json.contextual_embedding_enabled;\n      const headlineToAdd = contextualEmbeddingEnabled ? null : DOCUMENT_HEADLINE;\n      const finalChunks = this.addDocumentHeadline(mergedChunks, headlineToAdd);\n      console.log(`Step 4 - Added document headline to ${finalChunks.length} chunks (contextual_embedding_enabled: ${contextualEmbeddingEnabled})`);\n\n\n      // Generate statistics\n      const sizeStats = finalChunks.map(chunk => chunk.size);\n      const tooSmall = sizeStats.filter(size => size < this.MIN_CHUNK_SIZE).length;\n      const tooLarge = sizeStats.filter(size => size > this.MAX_CHUNK_SIZE).length;\n      const optimal = sizeStats.filter(size => size >= this.MIN_CHUNK_SIZE && size <= this.MAX_CHUNK_SIZE).length;\n      console.log(`Size distribution - Too small: ${tooSmall}, Optimal: ${optimal}, Too large: ${tooLarge}`);\n\n      // Set total chunks\n      this._total_chunks = finalChunks.length;\n\n      return this.createChunkMetadata(finalChunks);\n\n    } catch (error) {\n      return [{\n        error: true,\n        message: error.message,\n        stack: error.stack\n      }];\n    }\n  }\n\n  // ========================================================================\n  // INTEGRATED HIERARCHY EXTRACTION (formerly in Document Hierarchy Extractor)\n  // ========================================================================\n\n  // Map parsed sections to their corresponding chunk ranges using the final chunks\n  mapSectionsToChunks(chunks) {\n    const sections = this._parsed_sections;\n    if (!sections || sections.length === 0) return [];\n    if (!chunks || !Array.isArray(chunks)) {\n      return sections.map(section => ({\n        ...section,\n        chunkRange: null,\n        chunkCount: 0,\n        chunkIndices: []\n      }));\n    }\n\n    // Sort chunks by index for sequential processing\n    const sortedChunks = [...chunks].sort((a, b) => a.metadata.chunk_index - b.metadata.chunk_index);\n\n    // STEP 1: Single pass - map each section to its chunk index\n    const sectionToChunkMap = new Map();\n    let searchStartIndex = 0;\n\n    sections.forEach(section => {\n      const searchTitle = section.originalTitle || section.title;\n      const headingPattern = `${'#'.repeat(section.level)} ${searchTitle}`;\n\n      const foundChunks = [];\n\n      for (let i = searchStartIndex; i < sortedChunks.length; i++) {\n        const chunk = sortedChunks[i];\n        const chunkContent = chunk.content || '';\n\n        if (chunkContent.includes(headingPattern)) {\n          foundChunks.push(chunk.metadata.chunk_index);\n\n          if (i > searchStartIndex) {\n            searchStartIndex = i;\n          }\n\n          // Look for additional split parts\n          for (let j = i + 1; j < sortedChunks.length; j++) {\n            const nextChunk = sortedChunks[j];\n            const nextChunkContent = nextChunk.content || '';\n\n            if (nextChunkContent.includes(headingPattern) ||\n                (nextChunk.metadata.split_part_number &&\n                 nextChunk.metadata.total_chunks_in_section &&\n                 nextChunkContent.includes(section.title))) {\n              foundChunks.push(nextChunk.metadata.chunk_index);\n\n              if (nextChunk.metadata.total_chunks_in_section) {\n                const totalParts = nextChunk.metadata.total_chunks_in_section;\n                if (foundChunks.length >= totalParts) {\n                  break;\n                }\n              }\n            } else {\n              break;\n            }\n          }\n\n          break;\n        }\n      }\n\n      if (foundChunks.length > 0) {\n        sectionToChunkMap.set(section.sectionIndex, foundChunks);\n      }\n    });\n\n    // STEP 2: Add mapped chunk index to each section\n    const sectionsWithChunks = sections.map(section => {\n      const mappedChunks = sectionToChunkMap.get(section.sectionIndex);\n\n      if (!mappedChunks || mappedChunks.length === 0) {\n        return {\n          ...section,\n          mappedChunkIndex: null,\n          chunkRange: null,\n          chunkCount: 0,\n          chunkIndices: []\n        };\n      }\n\n      const allChunks = Array.isArray(mappedChunks) ? mappedChunks : [mappedChunks];\n\n      return {\n        ...section,\n        mappedChunkIndex: allChunks[0],\n        chunkRange: null,\n        chunkCount: allChunks.length,\n        chunkIndices: allChunks.sort((a, b) => a - b)\n      };\n    });\n\n    // STEP 3: Calculate hierarchical chunk ranges based on document structure\n    const sectionsWithRanges = sectionsWithChunks.map((section, index) => {\n      if (!section.chunkIndices || section.chunkIndices.length === 0) {\n        return section;\n      }\n\n      const startChunk = Math.min(...section.chunkIndices);\n      let endChunk = Math.max(...section.chunkIndices);\n\n      // Look ahead to find all chunks under this section until we hit a same-or-higher level\n      for (let i = index + 1; i < sectionsWithChunks.length; i++) {\n        const nextSection = sectionsWithChunks[i];\n\n        if (nextSection.level <= section.level) {\n          break;\n        }\n\n        if (nextSection.chunkIndices && nextSection.chunkIndices.length > 0) {\n          const nextSectionMaxChunk = Math.max(...nextSection.chunkIndices);\n          endChunk = Math.max(endChunk, nextSectionMaxChunk);\n        }\n      }\n\n      return {\n        ...section,\n        chunkRange: [startChunk, endChunk]\n      };\n    });\n\n    // STEP 4: Add parent ranges\n    return sectionsWithRanges.map((section, index) => {\n      let parentRange = null;\n\n      for (let i = index - 1; i >= 0; i--) {\n        const potentialParent = sectionsWithRanges[i];\n\n        if (potentialParent.level < section.level) {\n          if (potentialParent.chunkRange) {\n            parentRange = potentialParent.chunkRange;\n          }\n          break;\n        }\n      }\n\n      return {\n        ...section,\n        parentRange: parentRange\n      };\n    });\n  }\n\n  // Build hierarchical index string from sections with chunk ranges\n  buildHierarchicalIndex(sectionsWithChunks) {\n    const lines = ['Document Hierarchy with Chunk Index Ranges', ''];\n\n    sectionsWithChunks.forEach(section => {\n      const hashes = '#'.repeat(section.level);\n      let chunkInfo = '';\n\n      if (section.chunkRange) {\n        const [start, end] = section.chunkRange;\n        chunkInfo = start === end ? ` [${start}]` : ` [${start}-${end}]`;\n      } else {\n        chunkInfo = ' [no chunks]';\n      }\n\n      lines.push(`${hashes} ${section.title}${chunkInfo}`);\n    });\n\n    return lines.join('\\n');\n  }\n\n  // ========================================================================\n  // INTEGRATED MERGER LOGIC (formerly in Merger node)\n  // ========================================================================\n\n  // Merge section range data into chunk metadata (adds childRange and parentRange)\n  mergeHierarchyIntoChunks(sectionsWithChunks, chunks) {\n    // Create a map of chunk_index -> sections that reference it\n    const chunkToSectionsMap = new Map();\n\n    sectionsWithChunks.forEach(section => {\n      if (section.chunkIndices && Array.isArray(section.chunkIndices)) {\n        section.chunkIndices.forEach(chunkIndex => {\n          if (!chunkToSectionsMap.has(chunkIndex)) {\n            chunkToSectionsMap.set(chunkIndex, []);\n          }\n          chunkToSectionsMap.get(chunkIndex).push(section);\n        });\n      }\n    });\n\n    // Process each chunk and add section range metadata\n    return chunks.map(chunk => {\n      const chunkIndex = chunk.metadata.chunk_index;\n      const sectionsForChunk = chunkToSectionsMap.get(chunkIndex) || [];\n\n      let childRange = null;\n      let parentRange = null;\n\n      if (sectionsForChunk.length > 0) {\n        // Find absolute lowest and highest section ranges\n        const allSectionRanges = sectionsForChunk\n          .filter(section => section.chunkRange && Array.isArray(section.chunkRange))\n          .map(section => section.chunkRange);\n\n        if (allSectionRanges.length > 0) {\n          const allStarts = allSectionRanges.map(range => range[0]);\n          const allEnds = allSectionRanges.map(range => range[1]);\n          childRange = [Math.min(...allStarts), Math.max(...allEnds)];\n        }\n\n        // Find absolute lowest and highest parent ranges\n        const allParentRanges = sectionsForChunk\n          .filter(section => section.parentRange && Array.isArray(section.parentRange))\n          .map(section => section.parentRange);\n\n        if (allParentRanges.length > 0) {\n          const allParentStarts = allParentRanges.map(range => range[0]);\n          const allParentEnds = allParentRanges.map(range => range[1]);\n          parentRange = [Math.min(...allParentStarts), Math.max(...allParentEnds)];\n        }\n      }\n\n      // Return chunk with enhanced metadata\n      return {\n        ...chunk,\n        metadata: {\n          ...chunk.metadata,\n          childRange: childRange,\n          parentRange: parentRange\n        }\n      };\n    });\n  }\n\n  setDocumentSummary(summary) {\n    this._document_summary = summary;\n  }\n\n  getTotalChunks() {\n    return this._total_chunks;\n  }\n}\n\n// Main execution\nconst results = [];\n\nfor (const item of $input.all()) {\n  try {\n    // Get markdown content from the specified field\n    const markdownContent = item.json[MARKDOWN_FIELD];\n\n    if (!markdownContent || typeof markdownContent !== 'string') {\n      throw new Error(`Field '${MARKDOWN_FIELD}' does not contain valid markdown text`);\n    }\n\n    // Get or generate document ID\n    const docId = DOCUMENT_ID_FIELD && item.json[DOCUMENT_ID_FIELD]\n      ? item.json[DOCUMENT_ID_FIELD]\n      : `doc_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;\n\n    // Create chunker instance\n    const chunker = new SmartMarkdownChunker(MIN_CHUNK_SIZE, MAX_CHUNK_SIZE, TARGET_CHUNK_SIZE, DEV_MODE);\n\n    if (DOCUMENT_SUMMARY) {\n      chunker.setDocumentSummary(DOCUMENT_SUMMARY);\n    }\n\n    // Process the markdown (creates chunks + stores parsed sections internally)\n    const processedChunks = chunker.chunkText(markdownContent);\n\n    // Get enrichment data\n    const enrichmentData = (() => {\n      try {\n        const data = $input.first().json.custom_metadata || {};\n        // Uppercase the first word of document_headline_description\n        if (data.document_headline_description) {\n          const words = data.document_headline_description.split(' ');\n          if (words.length > 0) {\n            words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);\n            data.document_headline_description = words.join(' ');\n          }\n        }\n        return data;\n      }\n      catch { return {}; }\n    })();\n\n    // Build chunks array with metadata\n    const chunks = processedChunks.map(chunkData => ({\n      content: chunkData.chunk,\n      metadata: {\n        ...chunkData.chunk_metadata,\n        indexed_date: new Date().toISOString(),\n        doc_id: $('Set Data').first().json.doc_id,\n        doc_name: $('Set Data').first().json.doc_name,\n        ...enrichmentData\n      }\n    }));\n\n    // ========================================================================\n    // INTEGRATED: Hierarchy extraction + merger (formerly separate nodes)\n    // ========================================================================\n\n    // Map sections to chunks using the stored parsed sections\n    const sectionsWithChunks = chunker.mapSectionsToChunks(chunks);\n    console.log(`Hierarchy: Mapped ${sectionsWithChunks.length} sections to chunks`);\n\n    // Build hierarchical index\n    const hierarchicalIndex = chunker.buildHierarchicalIndex(sectionsWithChunks);\n\n    // Merge hierarchy data (childRange + parentRange) into chunk metadata\n    const enhancedChunks = chunker.mergeHierarchyIntoChunks(sectionsWithChunks, chunks);\n    console.log(`Merger: Enhanced ${enhancedChunks.length} chunks with childRange/parentRange`);\n\n    // Build document metadata\n    const documentMetadata = {\n      totalSections: sectionsWithChunks.length,\n      hierarchicalIndex: hierarchicalIndex,\n      processingTimestamp: new Date().toISOString(),\n      doc_id: $('Set Data').first().json.doc_id,\n      doc_name: $('Set Data').first().json.doc_name,\n      ...enrichmentData\n    };\n\n    // Return both chunks and document in single output\n    results.push({\n      json: {\n        chunks: enhancedChunks,\n        document: documentMetadata\n      }\n    });\n\n  } catch (error) {\n    // Add error item\n    results.push({\n      json: {\n        error: true,\n        message: error.message,\n        original_item: item.json\n      }\n    });\n  }\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5632,
+        4736
+      ],
+      "id": "b6f35af7-84b3-4ed3-9a6f-9763c1d88847",
+      "name": "Smart Chunker"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Markdown Hierarchy Extractor for n8n Code Node\n// This tool extracts document hierarchy from markdown content independently of chunking\n\n// Input Mappings - adjust these to match your n8n workflow\nconst MARKDOWN_FIELD = 'content';  // Field name containing the original markdown text\nconst CHUNKS_FIELD = 'chunks';     // Field name containing processed chunks (optional)\n\n// Data source mappings - get actual data from n8n nodes\nconst MARKDOWN_SOURCE = () => $('Set up Text for Embedding').first().json.content;\nconst CHUNKS_SOURCE = () => $input.first().json.chunks;\n\nclass HierarchyNode {\n  constructor(title, level) {\n    this.title = title;\n    this.level = level;\n  }\n}\n\nclass MarkdownHierarchyExtractor {\n  constructor(maxHeadingLength = 200) {\n    this.MAX_HEADING_LENGTH = maxHeadingLength;\n  }\n\n  // Extract clean document hierarchy from markdown\n  extractHierarchy(markdownContent, headingLevels = [1, 2, 3, 4, 5, 6]) {\n    const lines = markdownContent.split('\\n');\n    const sections = [];\n    let currentSection = null;\n    let currentContent = [];\n    const hierarchyStack = [];\n\n    for (let i = 0; i < lines.length; i++) {\n      const line = lines[i];\n      const headingMatch = line.match(/^(#+)\\s*(.*)$/);\n      \n      if (headingMatch) {\n        const level = headingMatch[1].length;\n        \n        // Only process specified heading levels\n        if (headingLevels.includes(level)) {\n          // Save previous section if it exists\n          if (currentSection && currentContent.length > 0) {\n            currentSection.content = currentContent.join('\\n');\n            currentSection.contentLength = currentSection.content.length;\n            sections.push(currentSection);\n          }\n\n          const originalTitle = headingMatch[2].trim();\n          let displayTitle = originalTitle;\n\n          // Truncate extremely long headings for display\n          if (displayTitle.length > this.MAX_HEADING_LENGTH) {\n            displayTitle = displayTitle.substring(0, this.MAX_HEADING_LENGTH - 3) + '...';\n          }\n\n          // Update hierarchy stack\n          while (hierarchyStack.length >= level) {\n            hierarchyStack.pop();\n          }\n          hierarchyStack.push(new HierarchyNode(displayTitle, level));\n\n          currentSection = {\n            title: displayTitle,\n            originalTitle: originalTitle,\n            level,\n            hierarchyStack: JSON.parse(JSON.stringify(hierarchyStack)),\n            hierarchyPath: hierarchyStack.map(node => node.title).join(' > '),\n            content: '',\n            contentLength: 0,\n            sectionIndex: sections.length\n          };\n\n          currentContent = [line];\n        } else {\n          // Include sub-headings in content\n          currentContent.push(line);\n        }\n      } else {\n        currentContent.push(line);\n      }\n    }\n\n    // Don't forget the last section\n    if (currentSection && currentContent.length > 0) {\n      currentSection.content = currentContent.join('\\n');\n      currentSection.contentLength = currentSection.content.length;\n      sections.push(currentSection);\n    }\n\n    // If no major headings found, treat entire document as one section\n    if (sections.length === 0) {\n      sections.push({\n        title: 'Document',\n        originalTitle: 'Document',\n        level: 1,\n        hierarchyStack: [new HierarchyNode('Document', 1)],\n        hierarchyPath: 'Document',\n        content: markdownContent,\n        contentLength: markdownContent.length,\n        sectionIndex: 0\n      });\n    }\n\n    return sections;\n  }\n\n\n\n  // Helper method to get consecutive chunks from a starting point\n  getConsecutiveChunks(chunks, startIndex) {\n    if (!chunks || chunks.length === 0 || startIndex >= chunks.length) {\n      return [];\n    }\n\n    const result = [chunks[startIndex]];\n    const startChunkIndex = chunks[startIndex].metadata.chunk_index;\n    \n    // Look for consecutive chunks after the starting chunk\n    for (let i = startIndex + 1; i < chunks.length; i++) {\n      const currentChunkIndex = chunks[i].metadata.chunk_index;\n      const expectedNextIndex = result[result.length - 1].metadata.chunk_index + 1;\n      \n      if (currentChunkIndex === expectedNextIndex) {\n        result.push(chunks[i]);\n      } else {\n        // Break on first non-consecutive chunk\n        break;\n      }\n    }\n    \n    return result;\n  }\n\n  // Map sections to their corresponding chunk ranges\n  mapSectionsToChunks(sections, chunks) {\n    if (!chunks || !Array.isArray(chunks)) {\n      return sections.map(section => ({\n        ...section,\n        chunkRange: null,\n        chunkCount: 0\n      }));\n    }\n\n    // Sort chunks by index for sequential processing\n    const sortedChunks = [...chunks].sort((a, b) => a.metadata.chunk_index - b.metadata.chunk_index);\n    \n    // STEP 1: Single pass - map each section to its chunk index\n    const sectionToChunkMap = new Map(); // sectionIndex -> chunkIndex\n    let searchStartIndex = 0; // Only search forward, never backward\n    const usedChunks = new Set(); // Track which chunks have been fully processed\n    \n    console.log('=== SINGLE PASS MAPPING ===');\n    \n    sections.forEach(section => {\n      // Use the original title (not truncated) for searching in chunks\n      const searchTitle = section.originalTitle || section.title;\n      const headingPattern = `${'#'.repeat(section.level)} ${searchTitle}`;\n      \n      // Search for this section's heading starting from searchStartIndex\n      const foundChunks = [];\n      \n      for (let i = searchStartIndex; i < sortedChunks.length; i++) {\n        const chunk = sortedChunks[i];\n        const chunkContent = chunk.content || '';\n        \n        if (chunkContent.includes(headingPattern)) {\n          foundChunks.push(chunk.metadata.chunk_index);\n          \n          // If we found a match beyond the current search start, advance the search start\n          if (i > searchStartIndex) {\n            searchStartIndex = i;\n          }\n          \n          // Look for additional split parts by checking for the section heading in subsequent chunks\n          for (let j = i + 1; j < sortedChunks.length; j++) {\n            const nextChunk = sortedChunks[j];\n            const nextChunkContent = nextChunk.content || '';\n            \n            // Check if next chunk contains our section heading (indicating it's a split part)\n            if (nextChunkContent.includes(headingPattern) || \n                (nextChunk.metadata.split_part_number && \n                 nextChunk.metadata.total_chunks_in_section &&\n                 nextChunkContent.includes(section.title))) {\n              foundChunks.push(nextChunk.metadata.chunk_index);\n              \n              // If this chunk has split metadata, use it to determine how many more parts to look for\n              if (nextChunk.metadata.total_chunks_in_section) {\n                const totalParts = nextChunk.metadata.total_chunks_in_section;\n                if (foundChunks.length >= totalParts) {\n                  break;\n                }\n              }\n            } else {\n              // Stop if we don't find a related chunk\n              break;\n            }\n          }\n          \n          break;\n        }\n      }\n      \n      if (foundChunks.length > 0) {\n        // Store all chunks for this section\n        sectionToChunkMap.set(section.sectionIndex, foundChunks);\n        console.log(`Section ${section.sectionIndex}: \"${section.title}\" → Chunks [${foundChunks.join(',')}]`);\n      } else {\n        console.log(`Section ${section.sectionIndex}: \"${section.title}\" → NOT FOUND`);\n      }\n    });\n    \n    console.log('=== END SINGLE PASS MAPPING ===');\n\n    // STEP 2: Add mapped chunk index to each section (keep chunkIndices as-is for splits)\n    const sectionsWithChunks = sections.map(section => {\n      const mappedChunks = sectionToChunkMap.get(section.sectionIndex);\n      \n      if (!mappedChunks || mappedChunks.length === 0) {\n        return {\n          ...section,\n          mappedChunkIndex: null,\n          chunkRange: null,\n          chunkCount: 0,\n          chunkIndices: []\n        };\n      }\n\n      // For sections with multiple chunks (splits), use all of them\n      const allChunks = Array.isArray(mappedChunks) ? mappedChunks : [mappedChunks];\n      \n      return {\n        ...section,\n        mappedChunkIndex: allChunks[0], // First chunk index for backward compatibility\n        chunkRange: null, // Will be calculated in step 3\n        chunkCount: allChunks.length,\n        chunkIndices: allChunks.sort((a, b) => a - b)\n      };\n    });\n\n    // STEP 3: Calculate hierarchical chunk ranges based on document structure\n    const sectionsWithRanges = sectionsWithChunks.map((section, index) => {\n      if (!section.chunkIndices || section.chunkIndices.length === 0) {\n        return section;\n      }\n\n      // Find the range of chunks that belong to this section hierarchically\n      const startChunk = Math.min(...section.chunkIndices);\n      let endChunk = Math.max(...section.chunkIndices);\n\n      // Look ahead to find all chunks under this section until we hit a same-or-higher level\n      for (let i = index + 1; i < sectionsWithChunks.length; i++) {\n        const nextSection = sectionsWithChunks[i];\n        \n        // If we hit a section at the same level or higher, stop\n        if (nextSection.level <= section.level) {\n          break;\n        }\n        \n        // If the next section has chunks, extend our range to include them\n        if (nextSection.chunkIndices && nextSection.chunkIndices.length > 0) {\n          const nextSectionMaxChunk = Math.max(...nextSection.chunkIndices);\n          endChunk = Math.max(endChunk, nextSectionMaxChunk);\n        }\n      }\n\n      return {\n        ...section,\n        chunkRange: [startChunk, endChunk]\n      };\n    });\n\n    // STEP 4: Add parent ranges\n    return sectionsWithRanges.map((section, index) => {\n      let parentRange = null;\n\n      // Find the immediate parent (first section with lower level going backwards)\n      for (let i = index - 1; i >= 0; i--) {\n        const potentialParent = sectionsWithRanges[i];\n        \n        if (potentialParent.level < section.level) {\n          // Found the immediate parent\n          if (potentialParent.chunkRange) {\n            parentRange = potentialParent.chunkRange;\n          }\n          break;\n        }\n      }\n\n      return {\n        ...section,\n        parentRange: parentRange\n      };\n    });\n  }\n\n  // Build hierarchical index with section ranges\n  buildHierarchicalIndex(sectionsWithChunks) {\n    const lines = ['Document Hierarchy with Chunk Index Ranges', ''];\n    \n    sectionsWithChunks.forEach(section => {\n      const hashes = '#'.repeat(section.level);\n      let chunkInfo = '';\n      \n      if (section.chunkRange) {\n        const [start, end] = section.chunkRange;\n        chunkInfo = start === end ? ` [${start}]` : ` [${start}-${end}]`;\n      } else {\n        chunkInfo = ' [no chunks]';\n      }\n      \n      lines.push(`${hashes} ${section.title}${chunkInfo}`);\n    });\n    \n    return lines.join('\\n');\n  }\n\n}\n\n// Main execution for n8n\nconst results = [];\n\ntry {\n  // Get markdown content from specified node\n  const markdownContent = MARKDOWN_SOURCE();\n  \n  if (!markdownContent || typeof markdownContent !== 'string') {\n    throw new Error('No valid markdown content found from source node');\n  }\n\n  // Get chunks if available (optional)\n  const chunks = (() => {\n    try { return CHUNKS_SOURCE(); }\n    catch { return null; }\n  })();\n\n  // Create hierarchy extractor\n  const extractor = new MarkdownHierarchyExtractor();\n  \n  // Extract sections from original markdown\n  const sections = extractor.extractHierarchy(markdownContent);\n  \n  // Map sections to chunks (if chunks provided)\n  const sectionsWithChunks = extractor.mapSectionsToChunks(sections, chunks);\n  \n  // Build hierarchical index\n  const hierarchicalIndex = extractor.buildHierarchicalIndex(sectionsWithChunks);\n\n  // Get enrichment data if available\n  const enrichmentData = (() => {\n    try { return $('Set up Text for Embedding').first().json.custom_metadata || {}; }\n    catch { return {}; }\n  })();\n\n  // Build document metadata\n  const documentMetadata = {\n    totalSections: sections.length,\n    hierarchicalIndex: hierarchicalIndex,\n    processingTimestamp: new Date().toISOString(),\n    doc_id: (() => {\n      try { return $('Set Data').first().json.doc_id; }\n      catch { return null; }\n    })(),\n    doc_name: (() => {\n      try { return $('Set Data').first().json.doc_name; }\n      catch { return null; }\n    })(),\n    ...enrichmentData\n  };\n\n  // Return comprehensive hierarchy information\n  results.push({\n    json: {\n      sections: sectionsWithChunks.map(section => ({\n        sectionIndex: section.sectionIndex,\n        title: section.title,\n        // originalTitle: section.originalTitle,\n        level: section.level,\n        hierarchyPath: section.hierarchyPath,\n        // contentLength: section.contentLength,\n        // mappedChunkIndex: section.mappedChunkIndex,\n        chunkIndices: section.chunkIndices,\n        sectionRange: section.chunkRange,\n        parentRange: section.parentRange,\n        // chunkCount: section.chunkCount,\n        // Don't include full content to keep output manageable\n        // contentPreview: section.content ? section.content.substring(0, 200) + (section.content.length > 200 ? '...' : '') : ''\n      })),\n      document: documentMetadata\n    }\n  });\n\n} catch (error) {\n  results.push({\n    json: {\n      error: true,\n      message: error.message,\n      stack: error.stack\n    }\n  });\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5840,
+        4736
+      ],
+      "id": "9320999f-cddf-4a73-b808-641bda86adc5",
+      "name": "Document Hierarchy Extractor",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Chunk-Section Merger for n8n Code Node\n// This tool merges sections and chunks data, adding section ranges to chunk metadata\n\n// Input Mappings - adjust these to match your n8n workflow\nconst SECTIONS_SOURCE = () => $('Document Hierarchy Extractor').first().json.sections;\nconst CHUNKS_SOURCE = () => $('Smart Chunker').first().json.chunks;\n\nclass ChunkSectionMerger {\n  constructor() {\n    // No configuration needed\n  }\n\n  // Merge sections data into chunks metadata\n  mergeData(sections, chunks) {\n    if (!sections || !Array.isArray(sections)) {\n      throw new Error('Invalid sections data provided');\n    }\n    \n    if (!chunks || !Array.isArray(chunks)) {\n      throw new Error('Invalid chunks data provided');\n    }\n\n    // Create a map of chunk_index -> sections that reference it\n    const chunkToSectionsMap = new Map();\n\n    // Process each section to build the mapping\n    sections.forEach(section => {\n      if (section.chunkIndices && Array.isArray(section.chunkIndices)) {\n        section.chunkIndices.forEach(chunkIndex => {\n          if (!chunkToSectionsMap.has(chunkIndex)) {\n            chunkToSectionsMap.set(chunkIndex, []);\n          }\n          chunkToSectionsMap.get(chunkIndex).push(section);\n        });\n      }\n    });\n\n    // Process each chunk and add section range metadata\n    return chunks.map(chunk => {\n      const chunkIndex = chunk.metadata.chunk_index;\n      const sectionsForChunk = chunkToSectionsMap.get(chunkIndex) || [];\n\n      let sectionRange = null;\n      let parentRange = null;\n\n      if (sectionsForChunk.length > 0) {\n        // Find absolute lowest and highest section ranges\n        const allSectionRanges = sectionsForChunk\n          .filter(section => section.sectionRange && Array.isArray(section.sectionRange))\n          .map(section => section.sectionRange);\n\n        if (allSectionRanges.length > 0) {\n          const allStarts = allSectionRanges.map(range => range[0]);\n          const allEnds = allSectionRanges.map(range => range[1]);\n          sectionRange = [Math.min(...allStarts), Math.max(...allEnds)];\n        }\n\n        // Find absolute lowest and highest parent ranges\n        const allParentRanges = sectionsForChunk\n          .filter(section => section.parentRange && Array.isArray(section.parentRange))\n          .map(section => section.parentRange);\n\n        if (allParentRanges.length > 0) {\n          const allParentStarts = allParentRanges.map(range => range[0]);\n          const allParentEnds = allParentRanges.map(range => range[1]);\n          parentRange = [Math.min(...allParentStarts), Math.max(...allParentEnds)];\n        }\n      }\n\n      // Return chunk with enhanced metadata\n      return {\n        ...chunk,\n        metadata: {\n          ...chunk.metadata,\n          childRange: sectionRange,\n          parentRange: parentRange\n        }\n      };\n    });\n  }\n}\n\n// Main execution for n8n\nconst results = [];\n\ntry {\n  // Get sections and chunks data\n  const sections = SECTIONS_SOURCE();\n  const chunks = CHUNKS_SOURCE();\n\n  if (!sections) {\n    throw new Error('No sections data found from Hierarchy Extractor node');\n  }\n\n  if (!chunks) {\n    throw new Error('No chunks data found from Smart Markdown Chunker node');\n  }\n\n  // Create merger and process data\n  const merger = new ChunkSectionMerger();\n  const enhancedChunks = merger.mergeData(sections, chunks);\n\n  // Return enhanced chunks\n  results.push({\n    json: {\n      chunks: enhancedChunks,\n      totalChunks: enhancedChunks.length,\n      processingTimestamp: new Date().toISOString()\n    }\n  });\n\n} catch (error) {\n  results.push({\n    json: {\n      error: true,\n      message: error.message,\n      stack: error.stack\n    }\n  });\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        6032,
+        4736
+      ],
+      "id": "4e15fba4-442c-4d22-bb45-77b33d3df75d",
+      "name": "Merger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "chunks",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        6096,
+        5024
+      ],
+      "id": "3c7ebb2d-cfdf-4938-99c9-aadd7caf0bef",
+      "name": "Split Out1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "record_manager_v2",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Create Row in Record Manager').isExecuted ? $('Create Row in Record Manager').first().json.id : $('Search Record Manager').first().json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "hierarchical_index",
+              "fieldValue": "={{ $('Smart Chunker').first().json.document.hierarchicalIndex }}"
+            },
+            {
+              "fieldId": "document_headline",
+              "fieldValue": "={{ $('Smart Chunker').first().json.chunks[0].metadata.document_headline_description }}"
+            },
+            {
+              "fieldId": "document_summary",
+              "fieldValue": "={{ $('Smart Chunker').first().json.document.document_summary }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "complete"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        7664,
+        5424
+      ],
+      "id": "374283ff-91a1-4fae-9de0-b9f099c0dc5d",
+      "name": "Update our Record Manager1",
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        10512,
+        5488
+      ],
+      "id": "fc2ece26-ae18-4c79-a007-96c69d6b887e",
+      "name": "Next1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2d3a9569-f099-4136-84d0-6987e691d58b",
+              "leftValue": "={{ $('Set Data').first().json.doc_type }}",
+              "rightValue": "file",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        256,
+        2400
+      ],
+      "id": "c1a23cbd-44d6-4ea9-ba90-3966ed54ad6b",
+      "name": "If a file"
+    },
+    {
+      "parameters": {
+        "content": "## Loop End\nArchive and move to next item",
+        "height": 304,
+        "width": 256,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        176,
+        2304
+      ],
+      "id": "80673d58-db37-426a-9fde-cdbcd2c5805f",
+      "name": "Sticky Note32"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the text from the previous node\nconst inputText = $('Set Text (Merged)').first().json.text;\n\n// Define the page marker pattern\nconst pageMarkerPattern = /<<<PAGE_START:\\d+>>>\\s*/g;\n\n// Remove all page markers\nconst cleanedText = inputText.replace(pageMarkerPattern, '');\n\n// Return the cleaned text\nreturn [{\n  json: {\n    text: cleanedText\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4112,
+        4048
+      ],
+      "id": "099c0675-1c70-44fc-99f7-bb7ddc29e9aa",
+      "name": "Remove Page Number Placeholders",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is the chunk we want to situate within the whole document \n<chunk> \n{{ $json.content }}\n</chunk> \nPlease give a short succinct context to situate this chunk within the overall document for the purposes of improving search retrieval of the chunk. Answer only with the succinct context and nothing else. ",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=<document> \n{{ $('Set up Text for Embedding').item.json.content }} \n</document> "
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        7200,
+        4656
+      ],
+      "id": "b9d0599b-685a-4089-ab32-ac7d5d5869c1",
+      "name": "Basic LLM Chain",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5.2",
+          "mode": "list",
+          "cachedResultName": "gpt-5.2"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2288,
+        6432
+      ],
+      "id": "3cd91d8b-5528-4459-b882-e1e2641f96bf",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "r6dwaEmQxKEvrskM",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4624,
+        4080
+      ],
+      "id": "92ceef35-164e-4954-8f31-25244f3e4df5",
+      "name": "Wait3",
+      "webhookId": "359ab095-cb8b-4b07-bc9f-73c1fea452c0",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "## Set Folder",
+        "height": 280,
+        "width": 232
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1328,
+        1968
+      ],
+      "id": "9214c87e-20e2-4755-b69d-297488a9844e",
+      "name": "Sticky Note38"
+    },
+    {
+      "parameters": {
+        "content": "## Set Folder",
+        "height": 280,
+        "width": 232
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        2304
+      ],
+      "id": "b20efe5c-796f-42ac-b06b-5f96a712a500",
+      "name": "Sticky Note39"
+    },
+    {
+      "parameters": {
+        "content": "## Set Folder",
+        "height": 232,
+        "width": 232
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        1552
+      ],
+      "id": "f7147ed9-659b-4da0-b96b-e33a4b435c07",
+      "name": "Sticky Note40"
+    },
+    {
+      "parameters": {
+        "content": "## Set Folder",
+        "height": 232,
+        "width": 232
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        464,
+        1312
+      ],
+      "id": "c4e82213-26ed-4f9d-b27a-9651a88b823a",
+      "name": "Sticky Note41"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3d022e79-b19a-4d4b-8e64-eeea2d7500a5",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "complete",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "2a5fdcd6-162b-4f6b-ae1a-4b808619ef18",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2160,
+        4736
+      ],
+      "id": "3afc3254-ca47-4baf-9c12-dde339164420",
+      "name": "If Record is Complete"
+    },
+    {
+      "parameters": {
+        "content": "## Rate Limiting\nIf you run in to LLM Rate Limiting issues with LightRAG processing you can slow down file ingestion here",
+        "height": 304,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4576,
+        3920
+      ],
+      "id": "89924595-0851-46e5-a0f0-de1bdf24a84d",
+      "name": "Sticky Note43",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "record_manager_v2",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Create Row in Record Manager').isExecuted ? $('Create Row in Record Manager').first().json.id : $('Search Record Manager').first().json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "error"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        8960,
+        4096
+      ],
+      "id": "0902b8e7-da94-481d-be79-5177baced1b6",
+      "name": "Update our Record Manager2",
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "errorMessage": "={{ $('Error Message').item.json.error }}"
+      },
+      "type": "n8n-nodes-base.stopAndError",
+      "typeVersion": 1,
+      "position": [
+        9136,
+        4096
+      ],
+      "id": "929a51fd-c1b9-4d03-ac86-b2a63ad06620",
+      "name": "Stop and Error"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1ddf5b25-bae7-4e91-b6d3-3b7a5e2486fa",
+              "name": "error",
+              "value": "={{ $json.error }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        8784,
+        4096
+      ],
+      "id": "bc0a3c9f-62c3-4751-822c-f109833a28f7",
+      "name": "Error Message"
+    },
+    {
+      "parameters": {
+        "content": "## Rate Limiting - Fall Backs\nYou can copy the above LLM Chain and output parser and hook up a different API account or different API service. \n\nThe error track from the above node will feed this new node and success will merge into the \"Setup Text for Embedding\" node\n\nThe same can be done for the \"Basic LLM Chain within the Contextual Embedding\" and the \"Create OpenAI Embeddings\" calls",
+        "height": 272,
+        "width": 384,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        4832,
+        4992
+      ],
+      "id": "5ab33776-4dd9-4398-b55c-980b1ecf101f",
+      "name": "Sticky Note35"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        192,
+        544
+      ],
+      "id": "ca265a81-e511-45bd-959e-e559d55b68a6",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "documents_v2",
+        "filterType": "string",
+        "filterString": "=metadata->>doc_id=like.*{{ $('Loop Over Items1').item.json.id }}*"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        928,
+        448
+      ],
+      "id": "83f51bf2-ae3a-4215-bf7a-5c7005fb9669",
+      "name": "Delete Previous Vectors1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1152,
+        448
+      ],
+      "id": "d12c4617-e2a0-4053-921b-9f077e7ad853",
+      "name": "Aggregate1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "record_manager_v2",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "doc_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Loop Over Items1').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        432,
+        640
+      ],
+      "id": "796a88f7-1a6e-4bf9-9a1a-6f8b0798a7c6",
+      "name": "Search Record Manager1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0a6b6fa5-854b-495a-85c0-7361f3e32f6d",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        640
+      ],
+      "id": "b42faf80-afe2-48a4-b026-3022f1e09c1d",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "record_manager_v2",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Search Record Manager1').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1616,
+        448
+      ],
+      "id": "50643c8c-58fd-48a4-99d4-84a31af3a266",
+      "name": "Delete Record from Record Manager",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "deleteFile",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Loop Over Items1').item.json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1968,
+        656
+      ],
+      "id": "d5dbf35c-01cd-401a-92f8-bea0e0264528",
+      "name": "Delete a file",
+      "retryOnFail": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VDLj39UaaNWpXOn5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "tableId": "tabular_document_rows",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "record_manager_id",
+              "condition": "eq",
+              "keyValue": "={{ $('Search Record Manager1').item.json.id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        448
+      ],
+      "id": "8c4f327a-49ef-42ce-93b2-b2db7f9d36db",
+      "name": "Delete Old Tabular Data Rows",
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "retryOnFail": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "JXvQLWfqIjdcMyqm",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# RAG File Deletion\nAny files in the Recycling Bin sub-folder will be deleted from the vector store and sub-folder",
+        "height": 468,
+        "width": 504,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -672,
+        320
+      ],
+      "id": "d41b1e14-e6c2-4a60-a5f1-85952bd3ad4b",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Set Folder",
+        "height": 248,
+        "width": 232
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        480
+      ],
+      "id": "061d4f40-0f96-44ce-a279-32c9eb7ed0c5",
+      "name": "Sticky Note42"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "limit": 100,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "12aSTS3HbJ4KTeXYMR_1zgKWR9BdY7Q9E"
+          },
+          "whatToSearch": "files"
+        },
+        "options": {
+          "fields": [
+            "id"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -80,
+        544
+      ],
+      "id": "2c9e2cb1-26cc-40ea-a572-58c79fc2113b",
+      "name": "Search files and folders",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VDLj39UaaNWpXOn5",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -336,
+        544
+      ],
+      "id": "66bd21db-4f99-44fd-bab9-d7b399247a04",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Insert Page Markers from Form Feed Characters\nconst PAGE_MARKER_START = '<<<PAGE_START:';\nconst PAGE_MARKER_END = '>>>';\n\nconst items = $input.all();\n\nfor (const item of items) {\n  const text = item.json.content || item.json.text || '';\n  \n  // Split on form feed characters (page breaks from PDF extraction)\n  const pages = text.split('\\f');\n  \n  if (pages.length > 1) {\n    const markedText = pages.map((page, index) => {\n      return `${PAGE_MARKER_START}${index}${PAGE_MARKER_END}\\n\\n${page}`;\n    }).join('\\n\\n');\n    \n    item.json.content = markedText;\n  } else {\n    item.json.content = `${PAGE_MARKER_START}0${PAGE_MARKER_END}\\n\\n${text}`;\n  }\n}\n\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5808,
+        1600
+      ],
+      "id": "1b076867-8a03-477e-b227-05d16b05ad45",
+      "name": "Insert Page Markers",
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Generate Hash": {
+      "main": [
+        [
+          {
+            "node": "Search Record Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Record Manager": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Row in Record Manager": {
+      "main": [
+        [
+          {
+            "node": "Set up Record ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Set Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Previous Vectors": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update our Record Manager": {
+      "main": [
+        [
+          {
+            "node": "Set up Record ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Update our Record Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Text": {
+      "main": [
+        [
+          {
+            "node": "Set Text (Merged)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set up Text for Embedding": {
+      "main": [
+        [
+          {
+            "node": "Smart Chunker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload File": {
+      "main": [
+        [
+          {
+            "node": "Get File URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "New Files": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Updated Files": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Data": {
+      "main": [
+        [
+          {
+            "node": "File Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Archive File": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Trigger Firecrawl",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop over Chunks": {
+      "main": [
+        [
+          {
+            "node": "Aggregate2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Contextual embedding enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "If Record is Complete",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create Row in Record Manager",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete Previous Vectors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate2": {
+      "main": [
+        [
+          {
+            "node": "Update our Record Manager1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser2": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Enrich",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Enrich",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Metadata Fields": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prep": {
+      "main": [
+        [
+          {
+            "node": "Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich": {
+      "main": [
+        [
+          {
+            "node": "Set up Text for Embedding",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is LightRAG enabled?": {
+      "main": [
+        [
+          {
+            "node": "Remove Page Number Placeholders",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Metadata Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is LightRAG enabled?1": {
+      "main": [
+        [
+          {
+            "node": "Check data type1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Next",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Multimodal enabled?": {
+      "main": [
+        [
+          {
+            "node": "Base64 File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is OCR enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a document": {
+      "main": [
+        [
+          {
+            "node": "Set Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from Excel": {
+      "main": [
+        [
+          {
+            "node": "Aggregate3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from CSV": {
+      "main": [
+        [
+          {
+            "node": "Aggregate3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Aggregate3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Array keys": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Set Text for Tabular Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get google sheet info": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate3": {
+      "main": [
+        [
+          {
+            "node": "Array keys",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Extract from text file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from text file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Multimodal enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upload file to LlamaParse",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from CSV",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract from Excel",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get google sheet info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Move to Error Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Text (Merged)": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Text for Tabular Data": {
+      "main": [
+        [
+          {
+            "node": "Set Text (Merged)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Data Rows": {
+      "main": [
+        [
+          {
+            "node": "data_rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Insert rows in a table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check data type": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Data Rows",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is LightRAG enabled?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "data_rows": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert rows in a table": {
+      "main": [
+        [
+          {
+            "node": "Aggregate4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow": {
+      "main": [
+        [
+          {
+            "node": "Set Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Knowledge Graph Updates": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contextual embedding enabled?": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Setup Chunk for Embedding1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chunk with contextual embedding": {
+      "main": [
+        [
+          {
+            "node": "Setup Chunk for Embedding1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check data type1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Remove Page Number Placeholders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Processing Status": {
+      "main": [
+        [
+          {
+            "node": "Counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Job Ready?": {
+      "main": [
+        [
+          {
+            "node": "Get parsed document",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Track",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Track",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Track",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file to LlamaParse": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get parsed document": {
+      "main": [
+        [
+          {
+            "node": "Set Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Processing Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Set counter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Counter": {
+      "main": [
+        [
+          {
+            "node": "Is Job Ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set counter": {
+      "main": [
+        [
+          {
+            "node": "Is Job Ready?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send tabular data to vector store?": {
+      "main": [
+        [
+          {
+            "node": "Fetch Metadata Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Continue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate4": {
+      "main": [
+        [
+          {
+            "node": "Send tabular data to vector store?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create OpenAI Embeddings": {
+      "main": [
+        [
+          {
+            "node": "Setup Chunk for Batch Insertion",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Chunk for Embedding1": {
+      "main": [
+        [
+          {
+            "node": "Create OpenAI Embeddings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Setup Chunk for Batch Insertion": {
+      "main": [
+        [
+          {
+            "node": "Insert into Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert into Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Loop over Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is OCR enabled?": {
+      "main": [
+        [
+          {
+            "node": "Upload File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "Generate Hash",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Continue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sanitize Text": {
+      "main": [
+        [
+          {
+            "node": "Set Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File URL": {
+      "main": [
+        [
+          {
+            "node": "Get OCR",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get OCR": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Markdown with Page Numbers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text": {
+      "main": [
+        [
+          {
+            "node": "Insert Page Markers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Base64 File": {
+      "main": [
+        [
+          {
+            "node": "Execute Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Prep",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Enrich",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set up Record ID": {
+      "main": [
+        [
+          {
+            "node": "Check data type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Continue": {
+      "main": [
+        [
+          {
+            "node": "Next1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webpage Markdown": {
+      "main": [
+        [
+          {
+            "node": "Set Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File Check": {
+      "main": [
+        [
+          {
+            "node": "Webpage Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Main File Download",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from text file": {
+      "main": [
+        [
+          {
+            "node": "Set Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Main File Download": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Set Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move to Error Folder": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Track": {
+      "main": [
+        [
+          {
+            "node": "Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error": {
+      "main": [
+        [
+          {
+            "node": "Move to Error Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Next": {
+      "main": [
+        [
+          {
+            "node": "Continue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Markdown with Page Numbers": {
+      "main": [
+        [
+          {
+            "node": "Set Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Smart Chunker": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Loop over Chunks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update our Record Manager1": {
+      "main": [
+        [
+          {
+            "node": "Next1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Next1": {
+      "main": [
+        [
+          {
+            "node": "If a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If a file": {
+      "main": [
+        [
+          {
+            "node": "Archive File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Page Number Placeholders": {
+      "main": [
+        [
+          {
+            "node": "Execute Knowledge Graph Updates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Chunk with contextual embedding",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Record is Complete": {
+      "main": [
+        [
+          {
+            "node": "Is LightRAG enabled?1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete Previous Vectors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update our Record Manager2": {
+      "main": [
+        [
+          {
+            "node": "Stop and Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Message": {
+      "main": [
+        [
+          {
+            "node": "Update our Record Manager2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Search Record Manager1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Previous Vectors1": {
+      "main": [
+        [
+          {
+            "node": "Aggregate1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate1": {
+      "main": [
+        [
+          {
+            "node": "Delete Old Tabular Data Rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Record Manager1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Delete Previous Vectors1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Delete a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Record from Record Manager": {
+      "main": [
+        [
+          {
+            "node": "Delete a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete a file": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Old Tabular Data Rows": {
+      "main": [
+        [
+          {
+            "node": "Delete Record from Record Manager",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Page Markers": {
+      "main": [
+        [
+          {
+            "node": "Sanitize Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "58246a40-e8c9-4622-aaab-43917c5dcc86",
+  "meta": {
+    "instanceId": "eaa3d31df30f69d853bf1887372824077726204755d7d83df055afd95f72246a"
+  },
+  "id": "RF5IlBPjh-9ATbO-7b362",
+  "tags": []
+}
