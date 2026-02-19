@@ -34,7 +34,7 @@ A production-grade n8n RAG (Retrieval-Augmented Generation) system composed of 5
 
 | File | Version | Purpose |
 |------|---------|---------|
-| `RAG INGESTION.json` | v1.2 | Main ingestion pipeline — extracts, chunks, embeds, and stores documents |
+| `RAG INGESTION.json` | v1.0.8c | Main ingestion pipeline — extracts, chunks, embeds, and stores documents |
 | `RAG Retrieval Sub-Workflow.json` | v1.0.8c | Agentic retrieval with dynamic hybrid search and context expansion |
 | `Knowledge Graph Workflow (LightRAG).json` | v1.1 | Insert/update/delete documents in LightRAG knowledge graph |
 | `Multimodal RAG Ingestion Sub-workflow.json` | v1.2 | OCR via Mistral, image extraction to Supabase, enriched markdown output |
@@ -55,7 +55,7 @@ A production-grade n8n RAG (Retrieval-Augmented Generation) system composed of 5
 
 - **Smart Chunking** - Hierarchical markdown-aware splitting (min 400 / target 600 / max 800 chars) with page number tracking
 - **Deduplication** - SHA256 content hashing via `record_manager_v2`; skips unchanged docs, re-indexes changed ones
-- **LLM Enrichment** - GPT-4 mini extracts headline, summary, and custom metadata per document
+- **LLM Enrichment** - Claude Sonnet 4.5 extracts headline, summary, and custom metadata per document
 - **Batch Embedding** - Chunks batched (200/batch) with OpenAI `text-embedding-3-small`, inserted via PostgreSQL `UNNEST`
 - **Tabular Data** - Excel/CSV rows stored individually as JSON in `tabular_document_rows`, optionally embedded
 
@@ -92,7 +92,9 @@ The retrieval workflow uses an agentic RAG pattern with GPT-5.2 and 3 tools:
 
 **Fetch Document Hierarchy** — Retrieves document structure from record_manager_v2
 
-Optional (disabled): Knowledge Graph queries, tabular SQL queries, Cohere reranking, Zep long-term memory
+**Cohere Reranking** — Results reranked by relevance using Cohere rerank-v3.5
+
+Optional (disabled): Knowledge Graph queries, tabular SQL queries, Zep long-term memory
 
 ## Sub-Workflows
 
@@ -126,14 +128,15 @@ Called by the retrieval workflow to persist conversation context:
 
 ## External Services
 
-- **OpenAI** — Embeddings (`text-embedding-3-small`), GPT-5.2 (retrieval agent), GPT-4 mini/4o (enrichment, metadata filtering)
+- **OpenAI** — Embeddings (`text-embedding-3-small`), GPT-5.2 (retrieval agent)
+- **Anthropic** — Claude Sonnet 4.5 (document enrichment), Claude Opus 4.5 (metadata prep/reranking)
 - **Mistral AI** — OCR (`mistral-ocr-latest`)
 - **Supabase / PostgreSQL** — Vector store, record management, image storage, edge functions (hybrid search, context expansion)
 - **Google Drive** — File triggers and operations
 - **LightRAG** — Knowledge graph (optional)
 - **Zep** — Long-term memory (optional)
 - **LlamaParse** — Advanced document parsing (disabled by default)
-- **Cohere** — Reranking (disabled by default)
+- **Cohere** — Reranking (rerank-v3.5, active)
 - **Firecrawl** — Web scraping (disabled by default)
 
 ---
@@ -141,13 +144,22 @@ Called by the retrieval workflow to persist conversation context:
 ## Changelog
 
 ### v1.0.8c - 2026-02-19
+
+**Retrieval Workflow:**
 - **Fixed sub-workflow trigger** — changed "When Executed by Another Workflow" from `inputSource: passthrough` to explicitly defined inputs (query, type, session_id, dense/sparse/ilike/fuzzy weights, fuzzy_threshold). Passthrough mode silently fails when called from an agent toolWorkflow — defined inputs are required for `$fromAI()` parameter binding
 - **Removed stale pinned data** — cleared pinned bitcoin.pdf test results from "Trigger Dynamic Hybrid Search" that were overriding live Supabase calls
 - **Fixed Cohere reranking code** — rewrote "Return Reordered Items1" to handle HTTP Request node response format (single item containing array vs multiple items). Re-enabled full reranking pipeline (If3, Create Array, Rerank with Cohere 3.5, Return Reordered Items1)
 - **Removed self-referencing Dynamic Hybrid Search3** — eliminated the self-calling tool node and `callerPolicy: any` setting; "Dynamic Hybrid Search" (pointing to Blueprint workflow) now serves as the sole search tool
-- **Switched retrieval agent to GPT-5.2** — replaced Claude Opus 4.6 with GPT-5.2 for both Agentic RAG and Prep Metadata nodes
+- **Switched retrieval agent to GPT-5.2** — replaced Claude Opus 4.6 with GPT-5.2 for Agentic RAG node
+- **Switched Prep Metadata1 to Claude Opus 4.5** — replaced GPT-5.2 with Anthropic Claude Opus 4.5 for metadata prep/reranking
+- **Removed memory context window limit** — `contextWindowLength` set to null on Supabase Short-Term Memory1 for full conversation history
 - **Simplified agent system prompt** — removed strict citation/grounding rules in favor of standard response format
-- Synced retrieval workflow from live n8n export
+
+**Ingestion Workflow:**
+- **Switched enrichment LLM to Claude Sonnet 4.5** — replaced OpenAI (GPT-4.1-mini) with Anthropic Claude Sonnet 4.5 for document headline/summary/metadata extraction
+- **Disabled contextual embeddings pipeline** — turned off 8 nodes (contextual embedding switch, LLM chain, both models, Edit Fields, Wait 5s, rate limiting note) to reduce latency and cost
+- **Updated Mistral OCR credentials** — switched from general "Mistral Cloud Free Account" to dedicated "Mistral OCR" credential across all 3 OCR nodes
+- Synced both workflows from live n8n exports
 
 ### v0.1.8b - 2025-02-16
 - **Added Anthropic Claude Sonnet 4.5** model nodes to both retrieval agent and ingestion pipeline

@@ -1,5 +1,5 @@
 {
-  "name": "RAG INGESTION v0.1.8",
+  "name": "RAG INGESTION v0.1.8c",
   "nodes": [
     {
       "parameters": {
@@ -305,8 +305,8 @@
       "retryOnFail": true,
       "credentials": {
         "mistralCloudApi": {
-          "id": "Z91uOlo3ymd8UaZz",
-          "name": "Mistral Cloud Free Account - BVIJ"
+          "id": "mKip8B6VsCtzpp3c",
+          "name": "Mistral OCR"
         }
       }
     },
@@ -1905,7 +1905,8 @@
         17152
       ],
       "id": "24399303-0ed2-4f11-ad66-d8172b4a45b9",
-      "name": "Contextual embedding enabled?"
+      "name": "Contextual embedding enabled?",
+      "disabled": true
     },
     {
       "parameters": {
@@ -1928,7 +1929,8 @@
         17008
       ],
       "id": "bded688c-65fe-48ea-84a2-a8eab6c677d7",
-      "name": "Chunk with contextual embedding"
+      "name": "Chunk with contextual embedding",
+      "disabled": true
     },
     {
       "parameters": {
@@ -2614,8 +2616,8 @@
       "retryOnFail": true,
       "credentials": {
         "mistralCloudApi": {
-          "id": "Z91uOlo3ymd8UaZz",
-          "name": "Mistral Cloud Free Account - BVIJ"
+          "id": "mKip8B6VsCtzpp3c",
+          "name": "Mistral OCR"
         }
       }
     },
@@ -2641,8 +2643,8 @@
       "retryOnFail": true,
       "credentials": {
         "mistralCloudApi": {
-          "id": "Z91uOlo3ymd8UaZz",
-          "name": "Mistral Cloud Free Account - BVIJ"
+          "id": "mKip8B6VsCtzpp3c",
+          "name": "Mistral OCR"
         }
       }
     },
@@ -2961,7 +2963,8 @@
         16912
       ],
       "id": "13460ea4-c231-4d8b-a15c-f38686a0042e",
-      "name": "Sticky Note34"
+      "name": "Sticky Note34",
+      "disabled": true
     },
     {
       "parameters": {
@@ -3078,8 +3081,8 @@
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        22304,
-        16784
+        22320,
+        16768
       ],
       "id": "11598cf8-37ee-49e1-9ca5-7239cf816f67",
       "name": "Sticky Note7"
@@ -3118,14 +3121,14 @@
     {
       "parameters": {
         "content": "# Contextual Vector Embeddings",
-        "height": 820,
-        "width": 1204,
+        "height": 836,
+        "width": 1220,
         "color": 5
       },
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        24736,
+        24720,
         16768
       ],
       "id": "d1bd2973-5c2d-45eb-92c9-9318061f8683",
@@ -3142,7 +3145,7 @@
       "typeVersion": 1,
       "position": [
         25968,
-        16736
+        16768
       ],
       "id": "48dfcc83-1366-4d3b-acaf-e6cf0cfe9edc",
       "name": "Sticky Note16"
@@ -3393,6 +3396,7 @@
       ],
       "id": "114e7ac2-417a-4bcd-9b67-1757ad8c0159",
       "name": "Basic LLM Chain",
+      "disabled": true,
       "onError": "continueErrorOutput"
     },
     {
@@ -3418,7 +3422,8 @@
           "id": "r6dwaEmQxKEvrskM",
           "name": "OpenAi account"
         }
-      }
+      },
+      "disabled": true
     },
     {
       "parameters": {
@@ -3959,7 +3964,8 @@
         17056
       ],
       "id": "788eb896-3a6f-4f22-8589-2f94b340a015",
-      "name": "Edit Fields"
+      "name": "Edit Fields",
+      "disabled": true
     },
     {
       "parameters": {},
@@ -3971,7 +3977,8 @@
       ],
       "id": "3eab27c8-efbf-452f-992a-454cf8eb17b5",
       "name": "Wait 5s",
-      "webhookId": "83d6b920-6b4b-481a-b405-5e833520194d"
+      "webhookId": "83d6b920-6b4b-481a-b405-5e833520194d",
+      "disabled": true
     },
     {
       "parameters": {
@@ -3991,6 +3998,32 @@
       ],
       "id": "c2c67e7c-fef8-4906-9fdc-24ea566c08e6",
       "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "UyAehXbUNQAWwZOs",
+          "name": "Claude SEB"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        22912,
+        17024
+      ],
+      "id": "f0c2ee83-a419-4cf4-bb27-956d14dee512",
+      "name": "Anthropic Chat Model1",
       "credentials": {
         "anthropicApi": {
           "id": "UyAehXbUNQAWwZOs",
@@ -4267,13 +4300,7 @@
     },
     "OpenAI Chat Model3": {
       "ai_languageModel": [
-        [
-          {
-            "node": "Enrich",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Fetch Metadata Fields": {
@@ -5430,6 +5457,17 @@
           }
         ]
       ]
+    },
+    "Anthropic Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Enrich",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -5438,7 +5476,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "fa9511bd-1998-4efb-ac3c-82c6bd80f324",
+  "versionId": "47d92ad0-185d-4c62-aef8-bd588cf9af1c",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "eaa3d31df30f69d853bf1887372824077726204755d7d83df055afd95f72246a"

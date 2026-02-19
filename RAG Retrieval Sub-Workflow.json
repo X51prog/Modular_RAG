@@ -776,6 +776,12 @@
       ],
       "id": "ce7123fa-2927-4892-a3c2-ec7228769394",
       "name": "Anthropic Chat Model1",
+      "credentials": {
+        "anthropicApi": {
+          "id": "UyAehXbUNQAWwZOs",
+          "name": "Claude SEB"
+        }
+      },
       "disabled": true
     },
     {
@@ -796,6 +802,12 @@
       ],
       "id": "c74fd6fd-21aa-4c0c-9742-b6663cd796c7",
       "name": "Anthropic Chat Model2",
+      "credentials": {
+        "anthropicApi": {
+          "id": "UyAehXbUNQAWwZOs",
+          "name": "Claude SEB"
+        }
+      },
       "disabled": true
     },
     {
@@ -1640,7 +1652,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        2464,
+        2192,
         1120
       ],
       "id": "3cc4cf87-eb90-4c0d-a665-43886f769f61",
@@ -1743,7 +1755,8 @@
     {
       "parameters": {
         "sessionIdType": "customKey",
-        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.session_id }}"
+        "sessionKey": "={{ $('When Executed by Another Workflow').item.json.session_id }}",
+        "contextWindowLength": null
       },
       "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
       "typeVersion": 1.3,
@@ -1941,6 +1954,31 @@
         "openAiApi": {
           "id": "r6dwaEmQxKEvrskM",
           "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-opus-4-5-20251101",
+          "mode": "list",
+          "cachedResultName": "Claude Opus 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        2368,
+        1104
+      ],
+      "id": "31ef7f0e-5fb8-45ba-ac5f-6cd53ec9f3c4",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "UyAehXbUNQAWwZOs",
+          "name": "Claude SEB"
         }
       }
     }
@@ -2327,13 +2365,7 @@
     },
     "OpenAI Chat Model4": {
       "ai_languageModel": [
-        [
-          {
-            "node": "Prep Metadata1",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
+        []
       ]
     },
     "Prep Metadata1": {
@@ -2441,6 +2473,17 @@
           }
         ]
       ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Prep Metadata1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
@@ -2449,8 +2492,9 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "434c4b4a-7fa7-416a-b88b-588328b29b81",
+  "versionId": "1b6e68cc-d47c-4aee-a456-f0ace3ad0dd4",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "eaa3d31df30f69d853bf1887372824077726204755d7d83df055afd95f72246a"
   },
   "id": "Bgl5d3deLQufGLff",
