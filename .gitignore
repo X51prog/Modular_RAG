@@ -1,8 +1,17 @@
 # Claude Code local settings
 .claude/
+.mcp.json
 
 # Dev folder — live n8n exports for diffing, not published
-N8N/
+work/
+
+# Dev utilities
+compare_nodes.py
+
+# Backup files
+*.bak
+*.bak2
+*.bak3
 
 # Accidental Windows artifacts
 nul
